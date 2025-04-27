@@ -1,0 +1,32 @@
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f4f4f4;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+/* Стили для левого блока (картинка) */
+.logo img {
+    height: 50px; /* Размер картинки */
+}
+
+/* Стили для центрального блока (текст "Новая Эра") */
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    color: green;
+    text-align: center;
+}
+
+/* Стили для правого блока (вход или регистрация) */
+.auth {
+    font-size: 16px;
+    color: #333;
+    text-decoration: none;
+}
+
+.auth:hover {
+    text-decoration: underline;
+}
