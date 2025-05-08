@@ -1,0 +1,80 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+body {
+  background: #eee;
+  color: #000;
+  padding: 20px;
+}
+
+.container {
+  width: 600px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #ccc;
+}
+
+h1 {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+input[type="text"],
+select,
+textarea,
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid gray;
+  border-radius: 5px;
+}
+
+.char-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.char-row input {
+  flex: 1;
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#addCharBtn {
+  background: gray;
+  color: white;
+}
+
+.save-btn {
+  background: green;
+  color: white;
+  width: 100%;
+}
+
+#message {
+  margin-top: 10px;
+  text-align: center;
+  font-weight: bold;
+}

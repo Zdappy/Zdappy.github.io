@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <link href="css/ADstyle.css" rel="stylesheet" />
+    <script src="js/ADjs.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Добавить новый товар</h1>
+        <form id="productForm">
+            <label for="category">Категория</label>
+            <select id="category" name="category">
+                <option value="semena">Семена</option>
+                <option value="rassada">Рассада</option>
+                <option value="cvety">Цветы</option>
+                <option value="posadochny_material">Посадочный материал</option>
+            </select>
+
+            <label for="title">Название товара</label>
+            <input type="text" id="title" name="title" required />
+
+            <label for="description">Описание</label>
+            <textarea id="description" name="description" rows="4"></textarea>
+
+            <div id="characteristics">
+                <h2>Характеристики</h2>
+                <div class="char-row">
+                    <input type="text" name="charName" placeholder="Название" />
+                    <input type="text" name="charValue" placeholder="Значение" />
+                </div>
+            </div>
+            <button type="button" id="addCharBtn">Добавить характеристику</button>
+
+            <label for="image">Изображение товара</label>
+            <input type="file" id="image" name="image" accept="image/*" />
+
+            <button type="submit" class="save-btn">Сохранить товар</button>
+        </form>
+        <div id="message"></div>
+    </div>
+    
+</body>
+</html
