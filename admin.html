@@ -16,6 +16,7 @@
                 <option value="semena">Семена</option>
                 <option value="rassada">Рассада</option>
                 <option value="cvety">Цветы</option>
+                <option value="ovoshi">Овощи</option>
                 <option value="posadochny_material">Посадочный материал</option>
             </select>
 
@@ -24,6 +25,9 @@
 
             <label for="description">Описание</label>
             <textarea id="description" name="description" rows="4"></textarea>
+
+            <label for="price">Цена (₽)</label>
+            <input type="text" id="price" name="price" required />
 
             <div id="characteristics">
                 <h2>Характеристики</h2>
@@ -39,8 +43,10 @@
 
             <button type="submit" class="save-btn">Сохранить товар</button>
         </form>
+        <a href="index.html">
+            <button class="back-btn">Назад на главную</button>
+        </a>
         <div id="message"></div>
     </div>
-    
 </body>
-</html
+</html>
