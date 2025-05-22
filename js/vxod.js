@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const password = document.getElementById("password").value;
 
         if (username === "1" && password === "123") {
-            window.location.href = "admin.html";
+            window.location.href = "../admin.html";
         } else {
             errorMessage.textContent = "Неверный логин или пароль.";
         }

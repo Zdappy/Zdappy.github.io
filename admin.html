@@ -14,7 +14,6 @@
             <label for="category">Категория</label>
             <select id="category" name="category">
                 <option value="semena">Семена</option>
-                <option value="rassada">Рассада</option>
                 <option value="cvety">Цветы</option>
                 <option value="ovoshi">Овощи</option>
                 <option value="posadochny_material">Посадочный материал</option>
@@ -29,14 +28,30 @@
             <label for="price">Цена (₽)</label>
             <input type="text" id="price" name="price" required />
 
-            <div id="characteristics">
-                <h2>Характеристики</h2>
-                <div class="char-row">
-                    <input type="text" name="charName" placeholder="Название" />
-                    <input type="text" name="charValue" placeholder="Значение" />
-                </div>
-            </div>
-            <button type="button" id="addCharBtn">Добавить характеристику</button>
+            <h2>Характеристики</h2>
+            <label for="k">Категория</label>
+            <input type="text" id="k" name="k" required />
+
+            <label for="t">Тип растения</label>
+            <input type="text" id="t" name="t" required />
+
+            <label for="s">Срок созревания</label>
+            <input type="text" id="s" name="s" required />
+
+            <label for="y">Условия выращивания</label>
+            <input type="text" id="y" name="y" required />
+
+            <label for="f">Форма плода</label>
+            <input type="text" id="f" name="f" required />
+
+            <label for="c">Цвет плода</label>
+            <input type="text" id="c" name="c" required />
+
+            <label for="v">Вес плода</label>
+            <input type="text" id="v" name="v" required />
+
+            <label for="yr">Урожайность</label>
+            <input type="text" id="yr" name="yr" required />
 
             <label for="image">Изображение товара</label>
             <input type="file" id="image" name="image" accept="image/*" />

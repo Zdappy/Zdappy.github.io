@@ -1,45 +1,64 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="images/icon.png">
-    <title>Новая Эра</title>
-    <link href="css/style.css" rel="stylesheet" />
-    <script src="js/Java.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="images/icon.png" />
+  <title>Новая Эра</title>
+  <link href="css/style.css" rel="stylesheet" />
+  <script src="js/Java.js"></script>
 </head>
 <body>
-    <!-- Шапка сайта-->
-    <header class="header">
-        <div class="container">
-            <div class="logo">
-                <img src="images/icon.png" alt="Логотип">
-                <span class="title">Новая Эра</span>
-            </div>
-            <div class="auth-links">
-                <a href="login.html" class="entrance">Вход</a>
-                <span class="separator">или</span>
-                <a href="register.html" class="registration">Регистрация</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Каталог товаров -->
-    <div class="catalog-container">
+  <header class="header">
+    <div class="container header-top">
+      <div class="logo">
+        <img src="images/icon.png" alt="Логотип" />
+        <span class="title">Новая Эра</span>
+      </div>
+      <div class="auth-links">
+        <a href="vxod/login.html" class="entrance">Вход</a>
+        <span class="separator">или</span>
+        <a href="vxod/register.html" class="registration">Регистрация</a>
+      </div>
+    </div>
+    <div class="container header-bottom">
+      <div class="catalog-container">
         <button class="catalog-button">Каталог товаров ▼</button>
         <div class="catalog-menu">
-            <ul>
-                <li>Семена</li>
-                <li>Рассада</li>
-                <li>Цветы</li>
-                <li>Овощи</li>
-                <li>Посадочный материал</li>
-            </ul>
+          <ul>
+            <li><a href="katalog/semena.html">Семена</a></li>
+            <li><a href="katalog/cvety.html">Цветы</a></li>
+            <li><a href="katalog/ovoshi.html">Овощи</a></li>
+            <li><a href="katalog/posadochny_material.html">Посадочный материал</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="search-cart">
+        <form class="search-form" onsubmit="return false;">
+        <input type="text" placeholder="Поиск товаров..." class="search-input" />
+        <button type="submit" class="search-btn">Найти</button>
+        </form>
+        <div class="cart-wrapper">
+            <div class="cart-icon" id="cartIcon">🛒<span class="cart-count">0</span></div>
+            <div class="cart-dropdown" id="cartDropdown">
+            <p>Ваша корзина пуста</p>
+            </div>
         </div>
     </div>
-    <!-- Подвал сайта -->
-    <footer class="footer">
-        <p>Copyright &copy; 2025 Новая Эра. Все права защищены.</p>
-    </footer>
+</div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="product-row">
+      <div class="product-card">Товар 1</div>
+      <div class="product-card">Товар 2</div>
+      <div class="product-card">Товар 3</div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2025 Новая Эра. Все права защищены.</p>
+  </footer>
 </body>
 </html>
