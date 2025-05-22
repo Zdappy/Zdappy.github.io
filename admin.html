@@ -1,46 +1,43 @@
-    <!DOCTYPE html>
-    <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Панель администратора</title>
-        <link href="css/ADstyle.css" rel="stylesheet" />
-        <script src="js/ADjs.js"></script>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Добавить новый товар</h1>
-            <form id="productForm">
-                <label for="category">Категория</label>
-                <select id="category" name="category">
-                    <option value="semenaO">Семена (Овощи)</option>
-                    <option value="semenaC">Семена (Цветы)</option>
-                    <option value="cvety">Цветы</option>
-                    <option value="ovoshi">Овощи</option>
-                    <option value="posadochny_material">Посадочный материал</option>
-                </select>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Панель администратора</title>
+  <link href="css/ADstyle.css" rel="stylesheet" />
+  <script src="js/ADjs.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Добавить новый товар</h1>
+    <form id="productForm">
+      <label for="category">Категория</label>
+      <select id="category" name="category">
+        <option value="semenaO">Семена (Овощи)</option>
+        <option value="semenaC">Семена (Цветы)</option>
+        <option value="cvety">Цветы</option>
+        <option value="ovoshi">Овощи</option>
+        <option value="posadochny_material">Посадочный материал</option>
+      </select>
 
-                <label for="title">Название товара</label>
-                <input type="text" id="title" name="title" required />
+      <label for="title">Название товара</label>
+      <input type="text" id="title" name="title" required />
 
-                <label for="description">Описание</label>
-                <textarea id="description" name="description" rows="4"></textarea>
+      <label for="description">Описание</label>
+      <textarea id="description" name="description" rows="4"></textarea>
 
-                <label for="price">Цена (₽)</label>
-                <input type="text" id="price" name="price" required />
+      <label for="price">Цена (₽)</label>
+      <input type="text" id="price" name="price" required />
 
-                <h2>Характеристики</h2>
-                <div id="characteristicsContainer"></div>
+      <div id="characteristicsContainer"></div>
 
-                <label for="image">Изображение товара</label>
-                <input type="file" id="image" name="image" accept="image/*" />
+      <label for="image">Изображение товара</label>
+      <input type="file" id="image" name="image" accept="image/*" />
 
-                <button type="submit" class="save-btn">Сохранить товар</button>
-            </form>
-            <a href="index.html">
-                <button class="back-btn">Назад на главную</button>
-            </a>
-            <div id="message"></div>
-        </div>
-    </body>
-    </html>
+      <button type="submit" class="save-btn">Сохранить товар</button>
+    </form>
+    <a href="index.html"><button class="back-btn">Назад на главную</button></a>
+    <div id="message"></div>
+  </div>
+</body>
+</html>

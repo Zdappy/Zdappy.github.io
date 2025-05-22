@@ -1,80 +1,39 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const categorySelect = document.getElementById("category");
-    const characteristicsContainer = document.getElementById("characteristicsContainer");
+  const categorySelect = document.getElementById("category");
+  const container = document.getElementById("characteristicsContainer");
+  const form = document.getElementById("productForm");
+  const message = document.getElementById("message");
 
-    const characteristicsByCategory = {
-        "semenaO": [
-            { id: "k", label: "Категория" },
-            { id: "t", label: "Тип растения" },
-            { id: "s", label: "Срок созревания" },
-            { id: "y", label: "Условия выращивания" },
-            { id: "f", label: "Форма плода" },
-            { id: "c", label: "Цвет плода" },
-            { id: "v", label: "Вес плода" },
-            { id: "yr", label: "Урожайность" }
-        ],
-        "ovoshi": [
-            { id: "k", label: "Категория" },
-            { id: "t", label: "Тип растения" },
-            { id: "s", label: "Срок созревания" },
-            { id: "y", label: "Условия выращивания" },
-            { id: "f", label: "Форма плода" },
-            { id: "c", label: "Цвет плода" },
-            { id: "v", label: "Вес плода" },
-            { id: "yr", label: "Урожайность" }
-        ],
-        "cvety": [
-            { id: "t", label: "Тип растения" },
-            { id: "k", label: "Категория" },
-            { id: "vn", label: "Видовое название" },
-            { id: "r", label: "Разновидность" },
-            { id: "h", label: "Высота растения" },
-            { id: "d", label: "Диаметр куста" },
-            { id: "df", label: "Диаметр цветка" },
-            { id: "color", label: "Окраска цветка" },
-            { id: "g", label: "Способ выращивания" },
-            { id: "p", label: "Объем кашпо" },
-            { id: "s", label: "Схема посадки" }
-        ],
-        "semenaC": [
-            { id: "t", label: "Тип растения" },
-            { id: "k", label: "Категория" },
-            { id: "vn", label: "Видовое название" },
-            { id: "r", label: "Разновидность" },
-            { id: "h", label: "Высота растения" },
-            { id: "d", label: "Диаметр куста" },
-            { id: "df", label: "Диаметр цветка" },
-            { id: "color", label: "Окраска цветка" },
-            { id: "g", label: "Способ выращивания" },
-            { id: "p", label: "Объем кашпо" },
-            { id: "s", label: "Схема посадки" }
-        ],
-        "posadochny_material": []
-    };
+  const characteristics = {
+    semenaO: ["Категория", "Тип растения", "Срок созревания", "Условия выращивания", "Форма плода", "Цвет плода", "Вес плода", "Урожайность"],
+    ovoshi: ["Категория", "Тип растения", "Срок созревания", "Условия выращивания", "Форма плода", "Цвет плода", "Вес плода", "Урожайность"],
+    cvety: ["Тип растения", "Категория", "Видовое название", "Разновидность", "Высота растения", "Диаметр куста", "Диаметр цветка", "Окраска цветка", "Способ выращивания", "Объем кашпо", "Схема посадки"],
+    semenaC: ["Тип растения", "Категория", "Видовое название", "Разновидность", "Высота растения", "Диаметр куста", "Диаметр цветка", "Окраска цветка", "Способ выращивания", "Объем кашпо", "Схема посадки"],
+    posadochny_material: []
+  };
 
-    function updateCharacteristicsFields(category) {
-        characteristicsContainer.innerHTML = "";
+  function updateFields() {
+    container.innerHTML = "";
+    const selected = categorySelect.value;
+    if (!characteristics[selected]) return;
 
-        const fields = characteristicsByCategory[category] || [];
-        fields.forEach(field => {
-            const label = document.createElement("label");
-            label.setAttribute("for", field.id);
-            label.textContent = field.label;
-
-            const input = document.createElement("input");
-            input.type = "text";
-            input.id = field.id;
-            input.name = field.id;
-            input.required = true;
-
-            characteristicsContainer.appendChild(label);
-            characteristicsContainer.appendChild(input);
-        });
-    }
-
-    categorySelect.addEventListener("change", function () {
-        updateCharacteristicsFields(this.value);
+    characteristics[selected].forEach(char => {
+      const label = document.createElement("label");
+      label.textContent = char;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.required = true;
+      container.appendChild(label);
+      container.appendChild(input);
     });
+  }
 
-    updateCharacteristicsFields(categorySelect.value);
+  categorySelect.addEventListener("change", updateFields);
+  updateFields();
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    message.textContent = "Товар сохранен!";
+    message.style.color = "green";
+  });
 });

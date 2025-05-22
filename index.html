@@ -6,9 +6,20 @@
   <link rel="icon" href="images/icon.png" />
   <title>Новая Эра</title>
   <link href="css/style.css" rel="stylesheet" />
-  <script src="js/Java.js"></script>
+  <script src="js/Java.js" defer></script>
 </head>
 <body>
+  <div id="overlay" class="overlay hidden"></div>
+  <div class="modal hidden" id="loginModal">
+    <div class="modal-content">
+      <h2>Вход</h2>
+      <input type="text" id="emailInput" placeholder="Email" />
+      <input type="password" id="passwordInput" placeholder="Пароль" />
+      <button id="loginBtn">Войти</button>
+      <p class="register-link">Регистрация</p>
+    </div>
+  </div>
+
   <header class="header">
     <div class="container header-top">
       <div class="logo">
@@ -16,9 +27,7 @@
         <span class="title">Новая Эра</span>
       </div>
       <div class="auth-links">
-        <a href="vxod/login.html" class="entrance">Вход</a>
-        <span class="separator">или</span>
-        <a href="vxod/register.html" class="registration">Регистрация</a>
+        <p class="entrance">Вход</p>
       </div>
     </div>
     <div class="container header-bottom">
@@ -35,17 +44,16 @@
       </div>
       <div class="search-cart">
         <form class="search-form" onsubmit="return false;">
-        <input type="text" placeholder="Поиск товаров..." class="search-input" />
-        <button type="submit" class="search-btn">Найти</button>
+          <input type="text" placeholder="Поиск товаров..." class="search-input" />
+          <button type="submit" class="search-btn">Найти</button>
         </form>
         <div class="cart-wrapper">
-            <div class="cart-icon" id="cartIcon">🛒<span class="cart-count">0</span></div>
-            <div class="cart-dropdown" id="cartDropdown">
+          <div class="cart-icon" id="cartIcon">🛒<span class="cart-count">0</span></div>
+          <div class="cart-dropdown" id="cartDropdown">
             <p>Ваша корзина пуста</p>
-            </div>
+          </div>
         </div>
-    </div>
-</div>
+      </div>
     </div>
   </header>
 
