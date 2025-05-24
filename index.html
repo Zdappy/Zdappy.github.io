@@ -10,13 +10,25 @@
 </head>
 <body>
   <div id="overlay" class="overlay hidden"></div>
+
   <div class="modal hidden" id="loginModal">
     <div class="modal-content">
       <h2>Вход</h2>
       <input type="text" id="emailInput" placeholder="Email" />
       <input type="password" id="passwordInput" placeholder="Пароль" />
       <button id="loginBtn">Войти</button>
-      <p class="register-link">Регистрация</p>
+      <p class="register-link" id="openRegister">Регистрация</p>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="registerModal">
+    <div class="modal-content">
+      <h2>Регистрация</h2>
+      <input type="text" placeholder="Имя" />
+      <input type="text" placeholder="Email" />
+      <input type="password" placeholder="Пароль" />
+      <button>Зарегистрироваться</button>
+      <p class="register-link" id="openLogin">У меня уже есть аккаунт</p>
     </div>
   </div>
 
@@ -58,11 +70,7 @@
   </header>
 
   <main class="main-content">
-    <div class="product-row">
-      <div class="product-card">Товар 1</div>
-      <div class="product-card">Товар 2</div>
-      <div class="product-card">Товар 3</div>
-    </div>
+    <div class="products-grid" id="productList"></div>
   </main>
 
   <footer class="footer">
