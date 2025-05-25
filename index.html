@@ -17,7 +17,7 @@
       <input type="text" id="emailInput" placeholder="Email" />
       <input type="password" id="passwordInput" placeholder="Пароль" />
       <button id="loginBtn">Войти</button>
-      <p class="register-link" id="openRegister">Регистрация</p>
+      <button class="switch-btn" id="openRegister">Регистрация</button>
     </div>
   </div>
 
@@ -28,7 +28,7 @@
       <input type="text" placeholder="Email" />
       <input type="password" placeholder="Пароль" />
       <button>Зарегистрироваться</button>
-      <p class="register-link" id="openLogin">У меня уже есть аккаунт</p>
+      <button class="switch-btn" id="openLogin">У меня уже есть аккаунт</button>
     </div>
   </div>
 
@@ -47,10 +47,10 @@
         <button class="catalog-button">Каталог товаров ▼</button>
         <div class="catalog-menu">
           <ul>
-            <li><a href="katalog/semena.html">Семена</a></li>
-            <li><a href="katalog/cvety.html">Цветы</a></li>
-            <li><a href="katalog/ovoshi.html">Овощи</a></li>
-            <li><a href="katalog/posadochny_material.html">Посадочный материал</a></li>
+            <li><a href="#" data-json="semenaO.json">Семена</a></li>
+            <li><a href="#" data-json="cvety.json">Цветы</a></li>
+            <li><a href="#" data-json="ovoshi.json">Овощи</a></li>
+            <li><a href="#" data-json="posadochny_material.json">Посадочный материал</a></li>
           </ul>
         </div>
       </div>
@@ -76,5 +76,16 @@
   <footer class="footer">
     <p>&copy; 2025 Новая Эра. Все права защищены.</p>
   </footer>
+  
+  <div class="modal hidden" id="productModal">
+  <div class="modal-content product-full">
+    <h2 id="modalTitle"></h2>
+    <img id="modalImage" src="" alt="" />
+    <p id="modalDescription"></p>
+    <table id="modalTable"></table>
+    <button class="switch-btn" id="closeProduct">Закрыть</button>
+  </div>
+</div>
+
 </body>
 </html>
