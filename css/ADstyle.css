@@ -67,3 +67,29 @@ button {
   text-align: center;
   font-weight: bold;
 }
+.dark-theme body {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
+.dark-theme .container {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+.dark-theme input,
+.dark-theme select,
+.dark-theme textarea {
+  background-color: #333;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+.dark-theme .save-btn {
+  background-color: #1b5e20;
+}
+
+.dark-theme .back-btn {
+  background-color: #444;
+}

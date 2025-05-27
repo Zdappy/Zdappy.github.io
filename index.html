@@ -2,20 +2,22 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="images/icon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Новая Эра</title>
+  <link rel="icon" href="images/icon.png" />
   <link href="css/style.css" rel="stylesheet" />
   <script src="js/Java.js" defer></script>
 </head>
 <body>
-  <div id="overlay" class="overlay hidden"></div>
+
+  <div class="modal-overlay hidden" id="overlay"></div>
 
   <div class="modal hidden" id="loginModal">
     <div class="modal-content">
       <h2>Вход</h2>
       <input type="text" id="emailInput" placeholder="Email" />
       <input type="password" id="passwordInput" placeholder="Пароль" />
+      <div id="error-message" style="color: red; font-size: 14px;"></div>
       <button id="loginBtn">Войти</button>
       <button class="switch-btn" id="openRegister">Регистрация</button>
     </div>
@@ -40,30 +42,31 @@
       </div>
       <div class="auth-links">
         <p class="entrance">Вход</p>
+        <button id="themeToggle" class="switch-btn">🌙</button>
       </div>
     </div>
+
     <div class="container header-bottom">
       <div class="catalog-container">
         <button class="catalog-button">Каталог товаров ▼</button>
         <div class="catalog-menu">
           <ul>
-            <li><a href="#" data-json="semenaO.json">Семена</a></li>
-            <li><a href="#" data-json="cvety.json">Цветы</a></li>
-            <li><a href="#" data-json="ovoshi.json">Овощи</a></li>
-            <li><a href="#" data-json="posadochny_material.json">Посадочный материал</a></li>
+            <li><a data-json="semenaO.json">Семена овощи</a></li>
+            <li><a data-json="semenaC.json">Семена цветы</a></li>
+            <li><a data-json="cvety.json">Рассада цветы</a></li>
+            <li><a data-json="ovoshi.json">Рассада овощи</a></li>
+            <li><a data-json="posadochny_material.json">Посадочный материал</a></li>
           </ul>
         </div>
       </div>
+
       <div class="search-cart">
         <form class="search-form" onsubmit="return false;">
           <input type="text" placeholder="Поиск товаров..." class="search-input" />
           <button type="submit" class="search-btn">Найти</button>
         </form>
         <div class="cart-wrapper">
-          <div class="cart-icon" id="cartIcon">🛒<span class="cart-count">0</span></div>
-          <div class="cart-dropdown" id="cartDropdown">
-            <p>Ваша корзина пуста</p>
-          </div>
+          <div class="cart-icon">🛒<span class="cart-count">0</span></div>
         </div>
       </div>
     </div>
@@ -76,16 +79,5 @@
   <footer class="footer">
     <p>&copy; 2025 Новая Эра. Все права защищены.</p>
   </footer>
-  
-  <div class="modal hidden" id="productModal">
-  <div class="modal-content product-full">
-    <h2 id="modalTitle"></h2>
-    <img id="modalImage" src="" alt="" />
-    <p id="modalDescription"></p>
-    <table id="modalTable"></table>
-    <button class="switch-btn" id="closeProduct">Закрыть</button>
-  </div>
-</div>
-
 </body>
 </html>

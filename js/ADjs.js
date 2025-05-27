@@ -36,4 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
     message.textContent = "Товар сохранен!";
     message.style.color = "green";
   });
+  if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.classList.add('dark-theme');
+  }
 });

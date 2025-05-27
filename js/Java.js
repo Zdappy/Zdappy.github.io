@@ -1,69 +1,61 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const btn = document.querySelector('.catalog-button');
-  const menu = document.querySelector('.catalog-menu');
-  const cartIcon = document.getElementById('cartIcon');
-  const cartDropdown = document.getElementById('cartDropdown');
+  const catalogBtn = document.querySelector('.catalog-button');
+  const catalogMenu = document.querySelector('.catalog-menu');
   const entrance = document.querySelector('.entrance');
-  const modal = document.getElementById('loginModal');
+  const loginModal = document.getElementById('loginModal');
   const registerModal = document.getElementById('registerModal');
   const overlay = document.getElementById('overlay');
-  const loginBtn = document.getElementById('loginBtn');
+  const themeToggle = document.getElementById('themeToggle');
+  const body = document.body;
 
-  btn.addEventListener('click', () => {
-    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-  });
-
-  cartIcon.addEventListener('click', () => {
-    cartDropdown.style.display = cartDropdown.style.display === 'block' ? 'none' : 'block';
-  });
+  if (catalogBtn && catalogMenu) {
+    catalogBtn.addEventListener('click', () => {
+      catalogMenu.style.display = catalogMenu.style.display === 'block' ? 'none' : 'block';
+    });
+  }
 
   document.addEventListener('click', (e) => {
-    if (!btn.contains(e.target) && !menu.contains(e.target)) {
-      menu.style.display = 'none';
+    if (catalogBtn && catalogMenu && !catalogBtn.contains(e.target) && !catalogMenu.contains(e.target)) {
+      catalogMenu.style.display = 'none';
     }
-    if (!cartIcon.contains(e.target) && !cartDropdown.contains(e.target)) {
-      cartDropdown.style.display = 'none';
-    }
-    if (!modal.contains(e.target) && !registerModal.contains(e.target) && !document.getElementById('productModal').contains(e.target) && !e.target.closest('.entrance')) {
-      modal.classList.add('hidden');
-      registerModal.classList.add('hidden');
-      document.getElementById('productModal').classList.add('hidden');
-      overlay.classList.add('hidden');
+
+    if (!loginModal?.contains(e.target) &&
+        !registerModal?.contains(e.target) &&
+        !e.target.closest('.entrance')) {
+      loginModal?.classList.add('hidden');
+      registerModal?.classList.add('hidden');
+      overlay?.classList.add('hidden');
     }
   });
 
-  entrance.addEventListener('click', (e) => {
-    e.preventDefault();
-    modal.classList.remove('hidden');
-    registerModal.classList.add('hidden');
-    overlay.classList.remove('hidden');
-  });
+  if (entrance && loginModal && overlay) {
+    entrance.addEventListener('click', (e) => {
+      e.preventDefault();
+      loginModal.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+    });
+  }
 
-  document.getElementById('openRegister').addEventListener('click', (e) => {
-    e.preventDefault();
-    modal.classList.add('hidden');
+  document.getElementById('openRegister')?.addEventListener('click', () => {
+    loginModal.classList.add('hidden');
     registerModal.classList.remove('hidden');
   });
 
-  document.getElementById('openLogin').addEventListener('click', (e) => {
-    e.preventDefault();
+  document.getElementById('openLogin')?.addEventListener('click', () => {
     registerModal.classList.add('hidden');
-    modal.classList.remove('hidden');
+    loginModal.classList.remove('hidden');
   });
 
-  loginBtn.addEventListener('click', () => {
+  document.getElementById('loginBtn')?.addEventListener('click', () => {
     const email = document.getElementById('emailInput').value;
     const password = document.getElementById('passwordInput').value;
+    const errorMessage = document.getElementById('error-message');
+
     if (email === '1' && password === '123') {
       window.location.href = 'admin.html';
     } else {
-      alert('Неверный логин или пароль');
+      errorMessage.textContent = 'Нет такого пользователя';
     }
-  });
-
-  document.getElementById('closeProduct').addEventListener('click', () => {
-    document.getElementById('productModal').classList.add('hidden');
-    overlay.classList.add('hidden');
   });
 
   function loadGoods(filename) {
@@ -72,13 +64,12 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(data => {
         const container = document.getElementById('productList');
         container.innerHTML = '';
-        const products = data[0];
-        for (let key in products) {
-          const p = products[key];
+        const products = Array.isArray(data) ? data : Object.values(data).flat();
+
+        products.forEach(p => {
           const name = p['название'] || p['Название'];
           const price = p['цена'] || p['Цена'];
           const image = p['изображение'];
-          const description = p['описание'] || p['Описание'] || '';
 
           const card = document.createElement('div');
           card.className = 'product-card';
@@ -87,33 +78,11 @@ document.addEventListener('DOMContentLoaded', function () {
             <h3>${name}</h3>
             <p class="price">${price}</p>
           `;
-
-          card.addEventListener('click', () => {
-            document.getElementById('modalTitle').textContent = name;
-            document.getElementById('modalImage').src = image;
-            document.getElementById('modalDescription').textContent = description;
-
-            const table = document.getElementById('modalTable');
-            table.innerHTML = '';
-            for (let key in p) {
-              if (!['название','Название','описание','Описание','цена','Цена','изображение'].includes(key)) {
-                let row = document.createElement('tr');
-                let cell1 = document.createElement('td');
-                let cell2 = document.createElement('td');
-                cell1.textContent = key;
-                cell2.textContent = p[key];
-                row.appendChild(cell1);
-                row.appendChild(cell2);
-                table.appendChild(row);
-              }
-            }
-
-            document.getElementById('productModal').classList.remove('hidden');
-            overlay.classList.remove('hidden');
-          });
-
           container.appendChild(card);
-        }
+        });
+      })
+      .catch(() => {
+        alert('Не удалось загрузить товары');
       });
   }
 
@@ -124,7 +93,19 @@ document.addEventListener('DOMContentLoaded', function () {
       e.preventDefault();
       const file = this.getAttribute('data-json');
       loadGoods(file);
-      menu.style.display = 'none';
+      catalogMenu.style.display = 'none';
     });
+  });
+
+  if (localStorage.getItem('theme') === 'dark') {
+    body.classList.add('dark-theme');
+    if (themeToggle) themeToggle.textContent = '☀️';
+  }
+
+  themeToggle?.addEventListener('click', () => {
+    body.classList.toggle('dark-theme');
+    const isDark = body.classList.contains('dark-theme');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    themeToggle.textContent = isDark ? '☀️' : '🌙';
   });
 });
