@@ -12,21 +12,13 @@ document.addEventListener('DOMContentLoaded', function () {
     catalogBtn.addEventListener('click', () => {
       catalogMenu.style.display = catalogMenu.style.display === 'block' ? 'none' : 'block';
     });
+
+    document.addEventListener('click', (e) => {
+      if (!catalogBtn.contains(e.target) && !catalogMenu.contains(e.target)) {
+        catalogMenu.style.display = 'none';
+      }
+    });
   }
-
-  document.addEventListener('click', (e) => {
-    if (catalogBtn && catalogMenu && !catalogBtn.contains(e.target) && !catalogMenu.contains(e.target)) {
-      catalogMenu.style.display = 'none';
-    }
-
-    if (!loginModal?.contains(e.target) &&
-        !registerModal?.contains(e.target) &&
-        !e.target.closest('.entrance')) {
-      loginModal?.classList.add('hidden');
-      registerModal?.classList.add('hidden');
-      overlay?.classList.add('hidden');
-    }
-  });
 
   if (entrance && loginModal && overlay) {
     entrance.addEventListener('click', (e) => {
@@ -34,35 +26,47 @@ document.addEventListener('DOMContentLoaded', function () {
       loginModal.classList.remove('hidden');
       overlay.classList.remove('hidden');
     });
+
+    document.addEventListener('click', (e) => {
+      if (!loginModal.contains(e.target) &&
+          !registerModal.contains(e.target) &&
+          !e.target.closest('.entrance')) {
+        loginModal.classList.add('hidden');
+        registerModal.classList.add('hidden');
+        overlay.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('openRegister')?.addEventListener('click', () => {
+      loginModal.classList.add('hidden');
+      registerModal.classList.remove('hidden');
+    });
+
+    document.getElementById('openLogin')?.addEventListener('click', () => {
+      registerModal.classList.add('hidden');
+      loginModal.classList.remove('hidden');
+    });
+
+    document.getElementById('loginBtn')?.addEventListener('click', () => {
+      const email = document.getElementById('emailInput').value;
+      const password = document.getElementById('passwordInput').value;
+      const errorMessage = document.getElementById('error-message');
+
+      if (email === '1' && password === '123') {
+        window.location.href = 'admin.html';
+      } else {
+        errorMessage.textContent = 'Нет такого пользователя';
+      }
+    });
   }
-
-  document.getElementById('openRegister')?.addEventListener('click', () => {
-    loginModal.classList.add('hidden');
-    registerModal.classList.remove('hidden');
-  });
-
-  document.getElementById('openLogin')?.addEventListener('click', () => {
-    registerModal.classList.add('hidden');
-    loginModal.classList.remove('hidden');
-  });
-
-  document.getElementById('loginBtn')?.addEventListener('click', () => {
-    const email = document.getElementById('emailInput').value;
-    const password = document.getElementById('passwordInput').value;
-    const errorMessage = document.getElementById('error-message');
-
-    if (email === '1' && password === '123') {
-      window.location.href = 'admin.html';
-    } else {
-      errorMessage.textContent = 'Нет такого пользователя';
-    }
-  });
 
   function loadGoods(filename) {
     fetch('goods/' + filename)
       .then(res => res.json())
       .then(data => {
         const container = document.getElementById('productList');
+        if (!container) return;
+
         container.innerHTML = '';
         const products = Array.isArray(data) ? data : Object.values(data).flat();
 
@@ -97,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
             updateCartCount();
           });
         });
-      })
+      });
   }
 
   function updateCartCount() {
@@ -111,14 +115,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
   updateCartCount();
 
-  loadGoods('semenaO.json');
+  const params = new URLSearchParams(window.location.search);
+  const categoryFile = params.get('category') || 'semenaO.json';
+  if (document.getElementById('productList')) {
+    loadGoods(categoryFile);
+  }
+
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const cartContainer = document.getElementById('cartItems');
+  const totalPriceBlock = document.getElementById('totalPrice');
+
+  if (cartContainer && totalPriceBlock) {
+    cartContainer.innerHTML = '';
+    let total = 0;
+
+    cart.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.classList.add('cart-item');
+      div.innerHTML = `
+        <img src="${item.image}" alt="${item.name}" />
+        <p>${item.name}</p>
+        <p>Цена: ${item.price} × ${item.quantity}</p>
+        <button class="delete-btn" data-index="${index}">Удалить</button>
+      `;
+      cartContainer.appendChild(div);
+      total += parseFloat(item.price) * item.quantity;
+    });
+
+    totalPriceBlock.textContent = 'Итого: ' + total + ' ₽';
+
+    cartContainer.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const index = this.dataset.index;
+        cart.splice(index, 1);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        location.reload();
+      });
+    });
+  }
 
   document.querySelectorAll('.catalog-menu a').forEach(link => {
     link.addEventListener('click', function (e) {
-      e.preventDefault();
       const file = this.getAttribute('data-json');
-      loadGoods(file);
-      catalogMenu.style.display = 'none';
+      if (file) {
+        e.preventDefault();
+        window.location.href = `index.html?category=${file}`;
+      }
     });
   });
 
@@ -133,29 +175,4 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
     themeToggle.textContent = isDark ? '☀️' : '🌙';
   });
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const container = document.getElementById('cartItems');
-    const totalPriceBlock = document.getElementById('totalPrice');
-    let total = 0;
-
-    cart.forEach((item, index) => {
-      const div = document.createElement('div');
-      div.innerHTML = `
-        <img src="${item.image}" alt="${item.name}" width="100" />
-        <p>${item.name}</p>
-        <p>Цена: ${item.price} × ${item.quantity}</p>
-        <button onclick="removeItem(${index})">Удалить</button>
-        <hr/>
-      `;
-      container.appendChild(div);
-      total += parseFloat(item.price) * item.quantity;
-    });
-
-    totalPriceBlock.textContent = 'Итого: ' + total + ' ₽';
-
-    function removeItem(index) {
-      cart.splice(index, 1);
-      localStorage.setItem('cart', JSON.stringify(cart));
-      location.reload();
-    }
 });
