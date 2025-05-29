@@ -6,7 +6,19 @@ document.addEventListener('DOMContentLoaded', function () {
   const registerModal = document.getElementById('registerModal');
   const overlay = document.getElementById('overlay');
   const themeToggle = document.getElementById('themeToggle');
+  const searchInput = document.querySelector('.search-input');
+  const basketSearchForm = document.getElementById('basketSearchForm');
+  const basketSearchInput = document.getElementById('basketSearchInput');
   const body = document.body;
+
+  let allProducts = [];
+  const jsonFiles = [
+    'semenaO.json',
+    'semenaC.json',
+    'cvety.json',
+    'ovoshi.json',
+    'posadochny_material.json'
+  ];
 
   if (catalogBtn && catalogMenu) {
     catalogBtn.addEventListener('click', () => {
@@ -67,42 +79,93 @@ document.addEventListener('DOMContentLoaded', function () {
         const container = document.getElementById('productList');
         if (!container) return;
 
-        container.innerHTML = '';
         const products = Array.isArray(data) ? data : Object.values(data).flat();
-
-        products.forEach(p => {
-          const name = p['название'] || p['Название'];
-          const price = p['цена'] || p['Цена'];
-          const image = p['изображение'];
-
-          const card = document.createElement('div');
-          card.className = 'product-card';
-          card.innerHTML = `
-            <img src="${image}" alt="${name}">
-            <h3>${name}</h3>
-            <p class="price">${price}</p>
-            <button class="add-to-cart" data-name="${name}" data-price="${price}" data-image="${image}">Добавить в корзину</button>
-          `;
-          container.appendChild(card);
-
-          card.querySelector('.add-to-cart').addEventListener('click', function () {
-            const name = this.dataset.name;
-            const price = this.dataset.price;
-            const image = this.dataset.image;
-
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const index = cart.findIndex(item => item.name === name);
-            if (index !== -1) {
-              cart[index].quantity += 1;
-            } else {
-              cart.push({ name, price, image, quantity: 1 });
-            }
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartCount();
-          });
-        });
+        allProducts = products;
+        renderProducts(products);
       });
   }
+
+  function loadAllGoodsForSearch(callback) {
+    const all = [];
+    let loaded = 0;
+
+    jsonFiles.forEach(file => {
+      fetch('goods/' + file)
+        .then(res => res.json())
+        .then(data => {
+          const products = Array.isArray(data) ? data : Object.values(data).flat();
+          all.push(...products);
+          loaded++;
+          if (loaded === jsonFiles.length) {
+            callback(all);
+          }
+        });
+    });
+  }
+
+  function renderProducts(products) {
+    const container = document.getElementById('productList');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    products.forEach(p => {
+      const name = p['название'] || p['Название'];
+      const price = p['цена'] || p['Цена'];
+      const image = p['изображение'];
+
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <img src="${image}" alt="${name}">
+        <h3>${name}</h3>
+        <p class="price">${price}</p>
+        <button class="add-to-cart" data-name="${name}" data-price="${price}" data-image="${image}">Добавить в корзину</button>
+      `;
+      container.appendChild(card);
+
+      card.querySelector('.add-to-cart').addEventListener('click', function () {
+        const name = this.dataset.name;
+        const price = this.dataset.price;
+        const image = this.dataset.image;
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const index = cart.findIndex(item => item.name === name);
+        if (index !== -1) {
+          cart[index].quantity += 1;
+        } else {
+          cart.push({ name, price, image, quantity: 1 });
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+      });
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      const query = this.value.trim();
+      if (!query) {
+        renderProducts(allProducts);
+        return;
+      }
+
+      const fuse = new Fuse(allProducts, {
+        keys: ['название', 'Название'],
+        threshold: 0.4
+      });
+
+      const result = fuse.search(query).map(res => res.item);
+      renderProducts(result);
+    });
+  }
+
+  basketSearchForm?.addEventListener('submit', function () {
+    const query = basketSearchInput?.value.trim();
+    if (query) {
+      window.location.href = `index.html?search=${encodeURIComponent(query)}`;
+    }
+  });
 
   function updateCartCount() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -117,8 +180,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const params = new URLSearchParams(window.location.search);
   const categoryFile = params.get('category') || 'semenaO.json';
+  const searchQuery = params.get('search') || '';
+
   if (document.getElementById('productList')) {
-    loadGoods(categoryFile);
+    if (searchQuery) {
+      loadAllGoodsForSearch(all => {
+        allProducts = all;
+        const fuse = new Fuse(allProducts, {
+          keys: ['название', 'Название'],
+          threshold: 0.4
+        });
+        const result = fuse.search(searchQuery).map(r => r.item);
+        renderProducts(result);
+      });
+    } else {
+      loadGoods(categoryFile);
+    }
   }
 
   const cart = JSON.parse(localStorage.getItem('cart')) || [];

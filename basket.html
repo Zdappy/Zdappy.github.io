@@ -5,6 +5,7 @@
   <title>Корзина</title>
   <link href="css/style.css" rel="stylesheet" />
   <script src="js/Java.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body>
   <div class="modal-overlay hidden" id="overlay"></div>
@@ -60,8 +61,8 @@
       </div>
 
       <div class="search-cart">
-        <form class="search-form" onsubmit="return false;">
-          <input type="text" placeholder="Поиск товаров..." class="search-input" />
+        <form class="search-form" id="basketSearchForm" onsubmit="return false;">
+          <input type="text" class="search-input" id="basketSearchInput" placeholder="Поиск товаров..." />
           <button type="submit" class="search-btn">Найти</button>
         </form>
         <div class="cart-wrapper">
