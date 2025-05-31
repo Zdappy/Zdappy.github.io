@@ -5,19 +5,43 @@
   font-family: sans-serif;
 }
 
+:root {
+  --primary: #28a745;
+  --secondary: #555;
+  --bg: #f5f5f5;
+  --text: #333;
+  --card: white;
+  --input-bg: white;
+  --border: #ccc;
+}
+
+.dark-theme {
+  --primary: #1b5e20;
+  --secondary: #444;
+  --bg: #1e1e1e;
+  --text: #e0e0e0;
+  --card: #2a2a2a;
+  --input-bg: #333;
+  --border: #555;
+}
+
 body {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--bg);
+  color: var(--text);
   padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
   max-width: 600px;
   margin: auto;
-  background: white;
+  background: var(--card);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  flex: 1;
 }
 
 h1 {
@@ -38,8 +62,10 @@ input[type="file"] {
   width: 100%;
   padding: 10px;
   margin-top: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
   border-radius: 5px;
+  background: var(--input-bg);
+  color: var(--text);
 }
 
 button {
@@ -50,15 +76,16 @@ button {
   border-radius: 5px;
   cursor: pointer;
   width: 100%;
+  transition: 0.3s;
 }
 
 .save-btn {
-  background-color: #28a745;
+  background-color: var(--primary);
   color: white;
 }
 
 .back-btn {
-  background-color: #555;
+  background-color: var(--secondary);
   color: white;
 }
 
@@ -66,30 +93,4 @@ button {
   margin-top: 15px;
   text-align: center;
   font-weight: bold;
-}
-.dark-theme body {
-  background-color: #1e1e1e;
-  color: #e0e0e0;
-}
-
-.dark-theme .container {
-  background-color: #2a2a2a;
-  color: #e0e0e0;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
-}
-
-.dark-theme input,
-.dark-theme select,
-.dark-theme textarea {
-  background-color: #333;
-  color: #e0e0e0;
-  border-color: #555;
-}
-
-.dark-theme .save-btn {
-  background-color: #1b5e20;
-}
-
-.dark-theme .back-btn {
-  background-color: #444;
 }

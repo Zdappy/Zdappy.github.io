@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Корзина</title>
-  <link href="css/style.css" rel="stylesheet" />
+  <link href="css/style.css" rel="stylesheet">
   <script src="js/Java.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body>
   <div class="modal-overlay hidden" id="overlay"></div>
@@ -13,8 +12,8 @@
   <div class="modal hidden" id="loginModal">
     <div class="modal-content">
       <h2>Вход</h2>
-      <input type="text" id="emailInput" placeholder="Email" />
-      <input type="password" id="passwordInput" placeholder="Пароль" />
+      <input type="text" id="emailInput" placeholder="Email">
+      <input type="password" id="passwordInput" placeholder="Пароль">
       <div id="error-message" style="color: red; font-size: 14px;"></div>
       <button id="loginBtn">Войти</button>
       <button class="switch-btn" id="openRegister">Регистрация</button>
@@ -24,9 +23,9 @@
   <div class="modal hidden" id="registerModal">
     <div class="modal-content">
       <h2>Регистрация</h2>
-      <input type="text" placeholder="Имя" />
-      <input type="text" placeholder="Email" />
-      <input type="password" placeholder="Пароль" />
+      <input type="text" placeholder="Имя">
+      <input type="text" placeholder="Email">
+      <input type="password" placeholder="Пароль">
       <button>Зарегистрироваться</button>
       <button class="switch-btn" id="openLogin">У меня уже есть аккаунт</button>
     </div>
@@ -36,7 +35,7 @@
     <div class="container header-top">
       <div class="logo">
         <a href="index.html">
-          <img src="images/icon.png" alt="Логотип" />
+          <img src="images/icon.png" alt="Логотип">
         </a>
         <span class="title">Новая Эра</span>
       </div>
@@ -62,7 +61,7 @@
 
       <div class="search-cart">
         <form class="search-form" id="basketSearchForm" onsubmit="return false;">
-          <input type="text" class="search-input" id="basketSearchInput" placeholder="Поиск товаров..." />
+          <input type="text" class="search-input" id="basketSearchInput" placeholder="Поиск товаров...">
           <button type="submit" class="search-btn">Найти</button>
         </form>
         <div class="cart-wrapper">
@@ -76,7 +75,7 @@
     <div class="cart-container">
       <h1>Корзина</h1>
       <div id="cartItems"></div>
-      <h2 id="totalPrice"></h2>
+      <h2 id="totalPrice">&nbsp;</h2>
       <button class="buy-btn">Купить</button>
     </div>
   </main>

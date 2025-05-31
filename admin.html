@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Панель администратора</title>
-  <link href="css/ADstyle.css" rel="stylesheet" />
+  <link href="css/ADstyle.css" rel="stylesheet">
   <script src="js/ADjs.js"></script>
 </head>
 <body>
@@ -21,22 +21,24 @@
       </select>
 
       <label for="title">Название товара</label>
-      <input type="text" id="title" name="title" required />
+      <input type="text" id="title" name="title" required>
 
       <label for="description">Описание</label>
       <textarea id="description" name="description" rows="4"></textarea>
 
       <label for="price">Цена (₽)</label>
-      <input type="text" id="price" name="price" required />
+      <input type="text" id="price" name="price" required>
 
       <div id="characteristicsContainer"></div>
 
       <label for="image">Изображение товара</label>
-      <input type="file" id="image" name="image" accept="image/*" />
+      <input type="file" id="image" name="image" accept="image/*">
 
       <button type="submit" class="save-btn">Сохранить товар</button>
     </form>
-    <a href="index.html"><button class="back-btn">Назад на главную</button></a>
+
+    <a href="index.html" class="back-btn">Назад на главную</a>
+    
     <div id="message"></div>
   </div>
 </body>
