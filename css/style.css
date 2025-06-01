@@ -197,25 +197,20 @@ body {
   justify-items: center;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 960px) and (max-width: 1199px) {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
     padding: 0 50px;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
   .products-grid {
     grid-template-columns: repeat(3, 1fr);
     padding: 0 100px;
   }
 }
 
-@media (min-width: 1440px) {
-  .products-grid {
-    padding: 0 200px;
-  }
-}
 
 .product-card {
   background-color: var(--card-bg);
