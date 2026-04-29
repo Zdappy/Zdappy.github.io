@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   ]
 
   if (catalogBtn && catalogMenu) {
-    catalogBtn.addEventListener("click", function () {
+    catalogBtn.addEventListener("click", function () {  
       if (catalogMenu.style.display === "block") {
         catalogMenu.style.display = "none"
       } else {
