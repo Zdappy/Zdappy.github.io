@@ -1,9 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const categorySelect = document.getElementById("category");
-  const container = document.getElementById("characteristicsContainer");
-  const form = document.getElementById("productForm");
-  const message = document.getElementById("message");
-
++function () {
   const fieldsByCategory = {
     semenaO: ["Категория", "Тип растения", "Срок созревания", "Условия выращивания", "Форма плода", "Цвет плода", "Вес плода", "Урожайность"],
     ovoshi: ["Категория", "Тип растения", "Срок созревания", "Условия выращивания", "Форма плода", "Цвет плода", "Вес плода", "Урожайность"],
@@ -12,32 +7,52 @@ document.addEventListener("DOMContentLoaded", function () {
     posadochny_material: []
   };
 
-  function updateFormFields() {
-    container.innerHTML = "";
-    const selected = categorySelect.value;
-    if (!fieldsByCategory[selected]) return;
+  function updateFields() {
+    const select = document.getElementById("category");
+    const container = document.getElementById("characteristicsContainer");
+    if (!select || !container) return;
 
-    fieldsByCategory[selected].forEach(field => {
+    const fields = fieldsByCategory[select.value] || [];
+    container.innerHTML = "";
+
+    fields.forEach((field) => {
       const label = document.createElement("label");
       label.textContent = field;
+
       const input = document.createElement("input");
       input.type = "text";
       input.required = true;
+      input.placeholder = field;
+
       container.appendChild(label);
       container.appendChild(input);
     });
   }
 
-  categorySelect.addEventListener("change", updateFormFields);
-  updateFormFields();
+  document.addEventListener("DOMContentLoaded", () => {
+    const category = document.getElementById("category");
+    const form = document.getElementById("productForm");
+    const message = document.getElementById("message");
+    const image = document.getElementById("image");
 
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    message.textContent = "Товар сохранен!";
-    message.style.color = "green";
+    if (!category || !form || !message) return;
+
+    category.addEventListener("change", updateFields);
+    updateFields();
+
+    image?.addEventListener("change", () => {
+      message.textContent = image.files?.[0] ? `Выбран файл: ${image.files[0].name}` : "";
+      message.style.color = "var(--secondary)";
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      message.textContent = "Черновик товара сохранен. Следующий шаг — подключение БД и API.";
+      message.style.color = "var(--primary)";
+    });
+
+    if (localStorage.getItem("zdappy_theme") === "dark") {
+      document.body.classList.add("dark-theme");
+    }
   });
-
-  if (localStorage.getItem('theme') === 'dark') {
-    document.documentElement.classList.add('dark-theme');
-  }
-});
+}();

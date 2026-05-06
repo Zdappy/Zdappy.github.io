@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}404 — Страница не найдена{% endblock %}
+{% block content %}
+<section class="container error-page">
+  <h1>404</h1>
+  <p>Страница не найдена.</p>
+  <a class="hero-button" href="{{ url_for('main.index') }}">На главную</a>
+</section>
+{% endblock %}

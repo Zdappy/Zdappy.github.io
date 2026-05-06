@@ -1,268 +1,322 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const catalogBtn = document.querySelector(".catalog-button")
-  const catalogMenu = document.querySelector(".catalog-menu")
-  const entrance = document.querySelector(".entrance")
-  const loginModal = document.getElementById("loginModal")
-  const registerModal = document.getElementById("registerModal")
-  const overlay = document.getElementById("overlay")
-  const themeToggle = document.getElementById("themeToggle")
-  const searchInput = document.querySelector(".search-input")
-  const basketSearchForm = document.getElementById("basketSearchForm")
-  const basketSearchInput = document.getElementById("basketSearchInput")
-  const body = document.body
++function () {
+  const CART_KEY = "zdappy_cart";
+  const THEME_KEY = "zdappy_theme";
 
-  let allProducts = []
-  const jsonFiles = [
-    "semenaO.json",
-    "semenaC.json",
-    "cvety.json",
-    "ovoshi.json",
-    "posadochny_material.json",
-  ]
+  function getCart() {
+    try {
+      return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+    } catch (error) {
+      return [];
+    }
+  }
 
-  if (catalogBtn && catalogMenu) {
-    catalogBtn.addEventListener("click", function () {  
-      if (catalogMenu.style.display === "block") {
-        catalogMenu.style.display = "none"
+  function saveCart(cart) {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    updateCartCount();
+  }
+
+  function toNumber(priceText) {
+    if (typeof priceText === "number") return priceText;
+    const digits = String(priceText || "").replace(/[^\d.,]/g, "").replace(",", ".");
+    const value = Number.parseFloat(digits);
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  function formatPrice(value) {
+    return `${Math.round(value)} ₽`;
+  }
+
+  function updateCartCount() {
+    const countEl = document.getElementById("cartCount");
+    if (!countEl) return;
+    const count = getCart().reduce((sum, item) => sum + item.quantity, 0);
+    countEl.textContent = String(count);
+  }
+
+  function applyTheme(theme) {
+    const dark = theme === "dark";
+    document.body.classList.toggle("dark-theme", dark);
+    const toggle = document.getElementById("themeToggle");
+    if (toggle) toggle.textContent = dark ? "☀️" : "🌙";
+    localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
+  }
+
+  function initTheme() {
+    const saved = localStorage.getItem(THEME_KEY) || "light";
+    applyTheme(saved);
+  }
+
+  function initCatalogMenu() {
+    const catalogBtn = document.querySelector(".catalog-button");
+    const catalogMenu = document.querySelector(".catalog-menu");
+
+    if (!catalogBtn || !catalogMenu) return;
+
+    catalogBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      catalogMenu.style.display = catalogMenu.style.display === "block" ? "none" : "block";
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!catalogMenu.contains(event.target) && !catalogBtn.contains(event.target)) {
+        catalogMenu.style.display = "none";
+      }
+    });
+  }
+
+  function initAuthModals() {
+    const overlay = document.getElementById("overlay");
+    const loginModal = document.getElementById("loginModal");
+    const registerModal = document.getElementById("registerModal");
+    const openLogin = document.getElementById("openLogin");
+    const openRegister = document.getElementById("openRegister");
+    const entrance = document.querySelector(".entrance");
+
+    if (!overlay || !loginModal || !registerModal || !entrance) return;
+
+    const openModal = (modal) => {
+      overlay.classList.remove("hidden");
+      modal.classList.remove("hidden");
+    };
+
+    const closeModals = () => {
+      overlay.classList.add("hidden");
+      loginModal.classList.add("hidden");
+      registerModal.classList.add("hidden");
+    };
+
+    entrance.addEventListener("click", (event) => {
+      event.preventDefault();
+      openModal(loginModal);
+    });
+
+    openRegister?.addEventListener("click", () => {
+      loginModal.classList.add("hidden");
+      openModal(registerModal);
+    });
+
+    openLogin?.addEventListener("click", () => {
+      registerModal.classList.add("hidden");
+      openModal(loginModal);
+    });
+
+    overlay.addEventListener("click", closeModals);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeModals();
+    });
+
+    document.addEventListener("click", (event) => {
+      const clickedInside = loginModal.contains(event.target) || registerModal.contains(event.target);
+      const clickedEntrance = event.target.closest(".entrance");
+      if (!clickedInside && !clickedEntrance && !event.target.closest("#overlay")) {
+        return;
+      }
+    });
+  }
+
+  function buildCard(product) {
+    const card = document.createElement("article");
+    card.className = "product-card";
+
+    const image = product.image || "";
+    const title = product.name || "Без названия";
+    const description = product.description || "";
+    const priceText = product.price_text || formatPrice(product.price_value || 0);
+    const category = product.category || "";
+
+    card.innerHTML = `
+      <img src="${image}" alt="${title}">
+      <div class="product-body">
+        <span class="badge">${category}</span>
+        <h3>${title}</h3>
+        <p class="product-description">${description}</p>
+        <p class="price">${priceText}</p>
+        <div class="card-actions">
+          <button type="button" class="add-to-cart" data-title="${escapeHtml(title)}" data-price="${escapeHtml(String(priceText))}" data-image="${escapeHtml(image)}">В корзину</button>
+        </div>
+      </div>
+    `;
+
+    card.querySelector(".add-to-cart")?.addEventListener("click", () => {
+      const cart = getCart();
+      const existing = cart.find((item) => item.title === title);
+      if (existing) {
+        existing.quantity += 1;
       } else {
-        catalogMenu.style.display = "block"
+        cart.push({
+          title,
+          price_text: priceText,
+          price_value: toNumber(priceText),
+          image,
+          quantity: 1,
+        });
       }
-    })
+      saveCart(cart);
+    });
 
-    document.addEventListener("click", function (e) {
-      if (!catalogBtn.contains(e.target) && !catalogMenu.contains(e.target)) {
-        catalogMenu.style.display = "none"
-      }
-    })
-  }
-
-  if (entrance && loginModal && overlay) {
-    entrance.addEventListener("click", function (e) {
-      e.preventDefault()
-      loginModal.classList.remove("hidden")
-      overlay.classList.remove("hidden")
-    })
-
-    document.addEventListener("click", function (e) {
-      if (
-        !loginModal.contains(e.target) &&
-        !registerModal.contains(e.target) &&
-        !e.target.closest(".entrance")
-      ) {
-        loginModal.classList.add("hidden")
-        registerModal.classList.add("hidden")
-        overlay.classList.add("hidden")
-      }
-    })
-
-    document
-      .getElementById("openRegister")
-      ?.addEventListener("click", function () {
-        loginModal.classList.add("hidden")
-        registerModal.classList.remove("hidden")
-      })
-
-    document
-      .getElementById("openLogin")
-      ?.addEventListener("click", function () {
-        registerModal.classList.add("hidden")
-        loginModal.classList.remove("hidden")
-      })
-
-    document.getElementById("loginBtn")?.addEventListener("click", function () {
-      const email = document.getElementById("emailInput").value
-      const password = document.getElementById("passwordInput").value
-      const errorMessage = document.getElementById("error-message")
-
-      if (email === "1" && password === "123") {
-        window.location.href = "admin.html"
-      } else {
-        errorMessage.textContent = "Нет такого пользователя"
-      }
-    })
-  }
-
-  function loadGoods(filename) {
-    fetch("goods/" + filename)
-      .then((res) => res.json())
-      .then((data) => {
-        const container = document.getElementById("productList")
-        if (!container) return
-
-        const products = Array.isArray(data) ? data : Object.values(data).flat()
-        allProducts = products
-        renderProducts(products)
-      })
-  }
-
-  function loadAllGoodsForSearch(callback) {
-    const all = []
-    let loaded = 0
-
-    jsonFiles.forEach((file) => {
-      fetch("goods/" + file)
-        .then((res) => res.json())
-        .then((data) => {
-          const products = Array.isArray(data)
-            ? data
-            : Object.values(data).flat()
-          all.push(...products)
-          loaded++
-          if (loaded === jsonFiles.length) {
-            callback(all)
-          }
-        })
-    })
+    return card;
   }
 
   function renderProducts(products) {
-    const container = document.getElementById("productList")
-    if (!container) return
-
-    container.innerHTML = ""
-
-    products.forEach((p) => {
-      const name = p["название"] || p["Название"]
-      const price = p["цена"] || p["Цена"]
-      const image = p["изображение"]
-
-      const card = document.createElement("div")
-      card.className = "product-card"
-      card.innerHTML = `
-        <img src="${image}" alt="${name}">
-        <h3>${name}</h3>
-        <p class="price">${price}</p>
-        <button class="add-to-cart" data-name="${name}" data-price="${price}" data-image="${image}">Добавить в корзину</button>
-      `
-      container.appendChild(card)
-
-      card.querySelector(".add-to-cart").addEventListener("click", function () {
-        const name = this.dataset.name
-        const price = this.dataset.price
-        const image = this.dataset.image
-
-        let cart = JSON.parse(localStorage.getItem("cart")) || []
-        const index = cart.findIndex((item) => item.name === name)
-        if (index !== -1) {
-          cart[index].quantity += 1
-        } else {
-          cart.push({ name, price, image, quantity: 1 })
-        }
-        localStorage.setItem("cart", JSON.stringify(cart))
-        updateCartCount()
-      })
-    })
-  }
-
-  if (searchInput) {
-    searchInput.addEventListener("input", function () {
-      const query = this.value.trim()
-      if (!query) {
-        renderProducts(allProducts)
-        return
-      }
-
-      const fuse = new Fuse(allProducts, {
-        keys: ["название", "Название"],
-        threshold: 0.4,
-      })
-
-      const result = fuse.search(query).map((res) => res.item)
-      renderProducts(result)
-    })
-  }
-
-  basketSearchForm?.addEventListener("submit", function (e) {
-    e.preventDefault()
-    const query = basketSearchInput?.value.trim()
-    if (query) {
-      window.location.href = `index.html?search=${encodeURIComponent(query)}`
+    const container = document.getElementById("productList");
+    if (!container) return;
+    container.innerHTML = "";
+    if (!products.length) {
+      container.innerHTML = `<div class="flash">Ничего не найдено.</div>`;
+      return;
     }
-  })
+    products.forEach((product) => container.appendChild(buildCard(product)));
+  }
 
-  function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem("cart")) || []
-    const count = cart.reduce((sum, item) => sum + item.quantity, 0)
-    const countElement = document.querySelector(".cart-count")
-    if (countElement) {
-      countElement.textContent = count
+  async function loadProducts() {
+    const container = document.getElementById("productList");
+    if (!container) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const selectedCategory = container.dataset.selectedCategory || params.get("category") || "semenaO";
+    const searchQuery = container.dataset.search || params.get("search") || "";
+    const endpoint = container.dataset.apiUrl || "/api/products";
+
+    const url = new URL(endpoint, window.location.origin);
+    url.searchParams.set("category", selectedCategory);
+    if (searchQuery) url.searchParams.set("search", searchQuery);
+
+    try {
+      const response = await fetch(url.toString());
+      const products = await response.json();
+      renderProducts(Array.isArray(products) ? products : []);
+    } catch (error) {
+      container.innerHTML = `<div class="flash">Не удалось загрузить товары.</div>`;
     }
   }
 
-  updateCartCount()
+  function initSearch() {
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+    if (!searchForm || !searchInput) return;
 
-  const params = new URLSearchParams(window.location.search)
-  const categoryFile = params.get("category") || "semenaO.json"
-  const searchQuery = params.get("search") || ""
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get("category") || searchForm.querySelector('input[name="category"]')?.value || "semenaO";
+    searchForm.querySelector('input[name="category"]')?.setAttribute("value", category);
 
-  if (document.getElementById("productList")) {
-    if (searchQuery) {
-      loadAllGoodsForSearch((all) => {
-        allProducts = all
-        const fuse = new Fuse(allProducts, {
-          keys: ["название", "Название"],
-          threshold: 0.4,
-        })
-        const result = fuse.search(searchQuery).map((r) => r.item)
-        renderProducts(result)
-      })
-    } else {
-      loadGoods(categoryFile)
-    }
+    searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const query = searchInput.value.trim();
+      const url = new URL(window.location.origin + window.location.pathname);
+      url.searchParams.set("category", category);
+      if (query) url.searchParams.set("search", query);
+      window.location.href = url.toString();
+    });
   }
 
-  const cart = JSON.parse(localStorage.getItem("cart")) || []
-  const cartContainer = document.getElementById("cartItems")
-  const totalPriceBlock = document.getElementById("totalPrice")
+  function initCatalogLinks() {
+    document.querySelectorAll(".catalog-menu a").forEach((link) => {
+      link.addEventListener("click", () => {
+        document.querySelector(".catalog-menu").style.display = "none";
+      });
+    });
+  }
 
-  if (cartContainer && totalPriceBlock) {
-    cartContainer.innerHTML = ""
-    let total = 0
+  function renderBasket() {
+    const container = document.getElementById("cartItems");
+    const totalPrice = document.getElementById("totalPrice");
+    const buyBtn = document.getElementById("buyBtn");
+    if (!container || !totalPrice || !buyBtn) return;
+
+    const cart = getCart();
+    container.innerHTML = "";
+
+    if (!cart.length) {
+      container.innerHTML = `<div class="flash">Корзина пустая.</div>`;
+      totalPrice.textContent = "Итого: 0 ₽";
+      return;
+    }
+
+    let total = 0;
 
     cart.forEach((item, index) => {
-      const div = document.createElement("div")
-      div.classList.add("cart-item")
-      div.innerHTML = `
-        <img src="${item.image}" alt="${item.name}" />
-        <p>${item.name}</p>
-        <p>Цена: ${item.price} × ${item.quantity}</p>
-        <button class="delete-btn" data-index="${index}">Удалить</button>
-      `
-      cartContainer.appendChild(div)
-      total += parseFloat(item.price) * item.quantity
-    })
+      const itemTotal = (item.price_value || toNumber(item.price_text)) * item.quantity;
+      total += itemTotal;
 
-    totalPriceBlock.textContent = "Итого: " + total + " ₽"
+      const row = document.createElement("div");
+      row.className = "cart-item";
+      row.innerHTML = `
+        <img src="${item.image}" alt="${item.title}">
+        <div>
+          <h3>${item.title}</h3>
+          <p>${item.price_text}</p>
+          <p>Сумма: ${formatPrice(itemTotal)}</p>
+        </div>
+        <div class="qty-controls">
+          <button type="button" class="qty-btn" data-action="minus">−</button>
+          <span>${item.quantity}</span>
+          <button type="button" class="qty-btn" data-action="plus">+</button>
+          <button type="button" class="delete-btn">Удалить</button>
+        </div>
+      `;
 
-    cartContainer.querySelectorAll(".delete-btn").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const index = this.dataset.index
-        cart.splice(index, 1)
-        localStorage.setItem("cart", JSON.stringify(cart))
-        location.reload()
-      })
-    })
+      row.querySelector('[data-action="minus"]')?.addEventListener("click", () => {
+        const currentCart = getCart();
+        const current = currentCart[index];
+        if (!current) return;
+        current.quantity -= 1;
+        if (current.quantity <= 0) {
+          currentCart.splice(index, 1);
+        }
+        saveCart(currentCart);
+        renderBasket();
+      });
+
+      row.querySelector('[data-action="plus"]')?.addEventListener("click", () => {
+        const currentCart = getCart();
+        const current = currentCart[index];
+        if (!current) return;
+        current.quantity += 1;
+        saveCart(currentCart);
+        renderBasket();
+      });
+
+      row.querySelector(".delete-btn")?.addEventListener("click", () => {
+        const currentCart = getCart();
+        currentCart.splice(index, 1);
+        saveCart(currentCart);
+        renderBasket();
+      });
+
+      container.appendChild(row);
+    });
+
+    totalPrice.textContent = `Итого: ${formatPrice(total)}`;
+    buyBtn.addEventListener("click", () => {
+      alert("Этап оформления заказа будет добавлен на следующем шаге.");
+    }, { once: true });
   }
 
-  document.querySelectorAll(".catalog-menu a").forEach((link) => {
-    link.addEventListener("click", function (e) {
-      const file = this.getAttribute("data-json")
-      if (file) {
-        e.preventDefault()
-        window.location.href = `index.html?category=${file}`
-      }
-    })
-  })
-
-  if (localStorage.getItem("theme") === "dark") {
-    body.classList.add("dark-theme")
-    if (themeToggle) themeToggle.textContent = "☀️"
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
-  themeToggle?.addEventListener("click", function () {
-    body.classList.toggle("dark-theme")
-    const isDark = body.classList.contains("dark-theme")
-    localStorage.setItem("theme", isDark ? "dark" : "light")
-    this.textContent = isDark ? "☀️" : "🌙"
-  })
-})
+  document.addEventListener("DOMContentLoaded", () => {
+    initTheme();
+    initCatalogMenu();
+    initAuthModals();
+    initSearch();
+    initCatalogLinks();
+    updateCartCount();
+    loadProducts();
+    renderBasket();
+
+    const themeToggle = document.getElementById("themeToggle");
+    themeToggle?.addEventListener("click", () => {
+      const isDark = document.body.classList.toggle("dark-theme");
+      localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+      themeToggle.textContent = isDark ? "☀️" : "🌙";
+    });
+  });
+}();

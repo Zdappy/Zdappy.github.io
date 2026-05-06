@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Новая Эра — каталог{% endblock %}
+{% block page_name %}index{% endblock %}
+
+{% block content %}
+<section class="container page-hero">
+  <div>
+    <p class="hero-kicker">Интернет-магазин товаров для сада и огорода</p>
+    <h1>Каталог «Новая Эра»</h1>
+    <p class="hero-text">
+      Выбрана категория: <strong>{{ selected_category_title }}</strong>{% if search_query %}. Поиск: <strong>{{ search_query }}</strong>{% endif %}.
+    </p>
+  </div>
+  <a href="{{ url_for('main.basket') }}" class="hero-button">Перейти в корзину</a>
+</section>
+
+<section class="container catalog-section">
+  <div class="section-head">
+    <h2>Товары</h2>
+    <p>Каталог загружается через Flask API.</p>
+  </div>
+
+  <div
+    class="products-grid"
+    id="productList"
+    data-api-url="{{ url_for('api.products') }}"
+    data-selected-category="{{ selected_category or 'semenaO' }}"
+    data-search="{{ search_query or '' }}"
+  ></div>
+</section>
+{% endblock %}

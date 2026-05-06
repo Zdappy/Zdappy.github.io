@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Новая Эра — админ-панель{% endblock %}
+{% block page_name %}admin{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ADstyle.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="container admin-shell">
+  <h1>Добавить новый товар</h1>
+  <form id="productForm">
+    <label for="category">Категория</label>
+    <select id="category" name="category">
+      {% for category in categories or [] %}
+        <option value="{{ category.slug }}">{{ category.title }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="title">Название товара</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="description">Описание</label>
+    <textarea id="description" name="description" rows="5"></textarea>
+
+    <label for="price">Цена (₽)</label>
+    <input type="text" id="price" name="price" required>
+
+    <div id="characteristicsContainer"></div>
+
+    <label for="image">Изображение товара</label>
+    <input type="file" id="image" name="image" accept="image/*">
+
+    <button type="submit" class="save-btn">Сохранить товар</button>
+  </form>
+
+  <a href="{{ url_for('main.index') }}" class="back-btn">Назад на главную</a>
+  <div id="message"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{{ url_for('static', filename='js/ADjs.js') }}" defer></script>
+{% endblock %}

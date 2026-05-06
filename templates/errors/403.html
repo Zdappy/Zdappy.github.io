@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}403 — Доступ запрещен{% endblock %}
+{% block content %}
+<section class="container error-page">
+  <h1>403</h1>
+  <p>У вас нет доступа к этой странице.</p>
+  <a class="hero-button" href="{{ url_for('main.index') }}">На главную</a>
+</section>
+{% endblock %}
