@@ -1,32 +1,24 @@
-{% extends 'base.html' %}
-
-{% block title %}Новая Эра — каталог{% endblock %}
-{% block page_name %}index{% endblock %}
-
+{% extends "base.html" %}
+{% block title %}Каталог товаров{% endblock %}
 {% block content %}
-<section class="container page-hero">
-  <div>
-    <p class="hero-kicker">Интернет-магазин товаров для сада и огорода</p>
-    <h1>Каталог «Новая Эра»</h1>
-    <p class="hero-text">
-      Выбрана категория: <strong>{{ selected_category_title }}</strong>{% if search_query %}. Поиск: <strong>{{ search_query }}</strong>{% endif %}.
-    </p>
-  </div>
-  <a href="{{ url_for('main.basket') }}" class="hero-button">Перейти в корзину</a>
-</section>
-
-<section class="container catalog-section">
-  <div class="section-head">
-    <h2>Товары</h2>
-    <p>Каталог загружается через Flask API.</p>
-  </div>
-
-  <div
-    class="products-grid"
-    id="productList"
-    data-api-url="{{ url_for('api.products') }}"
-    data-selected-category="{{ selected_category or 'semenaO' }}"
-    data-search="{{ search_query or '' }}"
-  ></div>
-</section>
+<h1>Товары для сада и дома</h1>
+<div class="filters">
+    <a href="{{ url_for('index') }}">Все</a>
+    {% for cat in categories %}
+        <a href="{{ url_for('index', category_id=cat.id) }}">{{ cat.title }}</a>
+    {% endfor %}
+</div>
+<div class="products-grid">
+    {% for product in products %}
+    <article class="product-card">
+        <img src="{{ product.image_url or url_for('static', filename='images/placeholder.png') }}" alt="{{ product.title }}">
+        <h3>{{ product.title }}</h3>
+        <p>{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+        <span class="price">{{ "%.2f"|format(product.price) }} ₽</span>
+        <a href="#" class="btn-add-cart" data-id="{{ product.id }}">В корзину</a>
+    </article>
+    {% else %}
+    <p>Товары не найдены.</p>
+    {% endfor %}
+</div>
 {% endblock %}
