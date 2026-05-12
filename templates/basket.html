@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
-
-{% block title %}Новая Эра — корзина{% endblock %}
-{% block page_name %}basket{% endblock %}
-
+{% block title %}Корзина{% endblock %}
 {% block content %}
-<section class="container cart-container">
-  <div class="section-head cart-head">
-    <h1>Корзина</h1>
-    <p>Товары сохраняются в браузере на этапе начальной разработки.</p>
+<section class="cart-container">
+  <div class="section-head">
+    <div>
+      <p class="hero-kicker">Покупки</p>
+      <h1>Корзина</h1>
+    </div>
   </div>
 
   <div id="cartItems" class="cart-items"></div>

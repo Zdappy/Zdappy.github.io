@@ -1,27 +1,53 @@
 {% extends "base.html" %}
-{% block title %}Админ-панель{% endblock %}
+{% block title %}Админка{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ADstyle.css') }}">{% endblock %}
 {% block content %}
-<h2>Управление товарами</h2>
-<a href="{{ url_for('add_product') }}" class="btn-primary">Добавить товар</a>
-<table class="admin-table">
-    <thead>
-        <tr><th>ID</th><th>Название</th><th>Цена</th><th>Категория</th><th>Действия</th></tr>
-    </thead>
-    <tbody>
-        {% for product in products %}
-        <tr>
-            <td>{{ product.id }}</td>
-            <td>{{ product.title }}</td>
-            <td>{{ "%.2f"|format(product.price) }} ₽</td>
-            <td>{{ product.category.title }}</td>
-            <td>
-                <a href="#" class="btn-edit">Изменить</a>
-                <a href="#" class="btn-delete" data-id="{{ product.id }}">Удалить</a>
-            </td>
-        </tr>
-        {% else %}
-        <tr><td colspan="5">Товаров нет</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+<section class="form-container admin-card">
+    <div class="admin-head">
+        <div>
+            <p class="form-kicker">Управление каталогом</p>
+            <h1>Админ-панель</h1>
+            <p class="form-note">Добавление, редактирование и удаление товаров из базы.</p>
+        </div>
+        <div class="admin-actions">
+            <a href="{{ url_for('main.add_product') }}" class="save-btn inline-btn">Добавить товар</a>
+            <a href="{{ url_for('main.index') }}" class="back-btn inline-btn">На главную</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Цена</th>
+                    <th>Категория</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td data-label="ID">{{ product.id }}</td>
+                    <td data-label="Название">{{ product.name }}</td>
+                    <td data-label="Цена">{{ "%.0f"|format(product.price) }} ₽</td>
+                    <td data-label="Категория">{{ product.category.name }}</td>
+                    <td data-label="Действия">
+                        <div class="row-actions">
+                            <a class="top-link action-link" href="{{ url_for('main.edit_product', product_id=product.id) }}">Изменить</a>
+                            <form method="POST" action="{{ url_for('main.delete_product', product_id=product.id) }}" onsubmit="return confirm('Удалить товар?');">
+                                {{ csrf_token() }}
+                                <button type="submit" class="delete-mini">Удалить</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="empty-row">Товаров пока нет.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 {% endblock %}

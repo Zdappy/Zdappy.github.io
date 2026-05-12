@@ -1,9 +1,10 @@
-{% extends 'base.html' %}
-{% block title %}500 — Ошибка сервера{% endblock %}
+{% extends "base.html" %}
+{% block title %}500{% endblock %}
 {% block content %}
-<section class="container error-page">
-  <h1>500</h1>
-  <p>Произошла внутренняя ошибка.</p>
-  <a class="hero-button" href="{{ url_for('main.index') }}">На главную</a>
+<section class="error-page">
+    <p class="hero-kicker">Ошибка 500</p>
+    <h1>500</h1>
+    <p>На сервере произошла ошибка.</p>
+    <a class="hero-button" href="{{ url_for('main.index') }}">Вернуться в каталог</a>
 </section>
 {% endblock %}

@@ -1,38 +1,40 @@
 {% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ADstyle.css') }}">{% endblock %}
 {% block content %}
-<div class="container mt-4">
-    <h2>{{ title }}</h2>
-
-    <form method="POST" class="mt-3">
+<div class="form-container admin-card">
+    <p class="form-kicker">Каталог товаров</p>
+    <h1>{{ title }}</h1>
+    <p class="form-note">Поля формы сохраняются в базе данных через ORM.</p>
+    <form method="POST" novalidate>
         {{ form.hidden_tag() }}
-
-        <div class="mb-3">
-            {{ form.title.label(class='form-label') }}
-            {{ form.title(class='form-control') }}
+        <div class="form-group">
+            {{ form.name.label }}
+            {{ form.name(placeholder='Название товара') }}
+            {% for error in form.name.errors %}<div class="error">{{ error }}</div>{% endfor %}
         </div>
-
-        <div class="mb-3">
-            {{ form.description.label(class='form-label') }}
-            {{ form.description(class='form-control', rows='4') }}
+        <div class="form-group">
+            {{ form.description.label }}
+            {{ form.description(rows=6, placeholder='Краткое описание товара') }}
+            {% for error in form.description.errors %}<div class="error">{{ error }}</div>{% endfor %}
         </div>
-
-        <div class="mb-3">
-            {{ form.price.label(class='form-label') }}
-            {{ form.price(class='form-control') }}
+        <div class="form-group">
+            {{ form.price.label }}
+            {{ form.price(placeholder='0') }}
+            {% for error in form.price.errors %}<div class="error">{{ error }}</div>{% endfor %}
         </div>
-
-        <div class="mb-3">
-            {{ form.image_url.label(class='form-label') }}
-            {{ form.image_url(class='form-control') }}
+        <div class="form-group">
+            {{ form.image_url.label }}
+            {{ form.image_url(placeholder='static/images/example.png') }}
+            {% for error in form.image_url.errors %}<div class="error">{{ error }}</div>{% endfor %}
         </div>
-
-        <div class="mb-3">
-            {{ form.category.label(class='form-label') }}
-            {{ form.category(class='form-select') }}
+        <div class="form-group">
+            {{ form.category.label }}
+            {{ form.category() }}
+            {% for error in form.category.errors %}<div class="error">{{ error }}</div>{% endfor %}
         </div>
-
-        {{ form.submit(class='btn btn-success') }}
-        <a href="{{ url_for('main.admin') }}" class="btn btn-secondary">Назад</a>
+        {{ form.submit(class='save-btn') }}
     </form>
+    <a href="{{ url_for('main.admin') }}" class="back-btn full-width-link">Назад к списку</a>
 </div>
 {% endblock %}

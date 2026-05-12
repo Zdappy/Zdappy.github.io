@@ -1,11 +1,12 @@
-+function () {
+(() => {
   const CART_KEY = "zdappy_cart";
   const THEME_KEY = "zdappy_theme";
 
   function getCart() {
     try {
-      return JSON.parse(localStorage.getItem(CART_KEY)) || [];
-    } catch (error) {
+      const parsed = JSON.parse(localStorage.getItem(CART_KEY));
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
       return [];
     }
   }
@@ -15,206 +16,52 @@
     updateCartCount();
   }
 
-  function toNumber(priceText) {
-    if (typeof priceText === "number") return priceText;
-    const digits = String(priceText || "").replace(/[^\d.,]/g, "").replace(",", ".");
-    const value = Number.parseFloat(digits);
-    return Number.isFinite(value) ? value : 0;
-  }
-
   function formatPrice(value) {
-    return `${Math.round(value)} ₽`;
+    const number = Number(value) || 0;
+    return `${Math.round(number)} ₽`;
   }
 
   function updateCartCount() {
     const countEl = document.getElementById("cartCount");
     if (!countEl) return;
-    const count = getCart().reduce((sum, item) => sum + item.quantity, 0);
+    const count = getCart().reduce((sum, item) => sum + Number(item.quantity || 0), 0);
     countEl.textContent = String(count);
   }
 
   function applyTheme(theme) {
-    const dark = theme === "dark";
-    document.body.classList.toggle("dark-theme", dark);
+    const isDark = theme === "dark";
+    document.body.classList.toggle("dark-theme", isDark);
     const toggle = document.getElementById("themeToggle");
-    if (toggle) toggle.textContent = dark ? "☀️" : "🌙";
-    localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
+    if (toggle) toggle.textContent = isDark ? "☀️" : "🌙";
+    localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
   }
 
   function initTheme() {
-    const saved = localStorage.getItem(THEME_KEY) || "light";
-    applyTheme(saved);
+    applyTheme(localStorage.getItem(THEME_KEY) || "light");
   }
 
-  function initCatalogMenu() {
-    const catalogBtn = document.querySelector(".catalog-button");
-    const catalogMenu = document.querySelector(".catalog-menu");
-
-    if (!catalogBtn || !catalogMenu) return;
-
-    catalogBtn.addEventListener("click", (event) => {
-      event.stopPropagation();
-      catalogMenu.style.display = catalogMenu.style.display === "block" ? "none" : "block";
-    });
-
+  function attachCartButtons() {
     document.addEventListener("click", (event) => {
-      if (!catalogMenu.contains(event.target) && !catalogBtn.contains(event.target)) {
-        catalogMenu.style.display = "none";
-      }
-    });
-  }
+      const button = event.target.closest(".add-to-cart");
+      if (!button) return;
 
-  function initAuthModals() {
-    const overlay = document.getElementById("overlay");
-    const loginModal = document.getElementById("loginModal");
-    const registerModal = document.getElementById("registerModal");
-    const openLogin = document.getElementById("openLogin");
-    const openRegister = document.getElementById("openRegister");
-    const entrance = document.querySelector(".entrance");
+      const title = button.dataset.title || "Без названия";
+      const image = button.dataset.image || "/static/images/icon.png";
+      const priceText = button.dataset.price || formatPrice(button.dataset.priceValue || 0);
+      const priceValue = Number(button.dataset.priceValue || 0);
 
-    if (!overlay || !loginModal || !registerModal || !entrance) return;
-
-    const openModal = (modal) => {
-      overlay.classList.remove("hidden");
-      modal.classList.remove("hidden");
-    };
-
-    const closeModals = () => {
-      overlay.classList.add("hidden");
-      loginModal.classList.add("hidden");
-      registerModal.classList.add("hidden");
-    };
-
-    entrance.addEventListener("click", (event) => {
-      event.preventDefault();
-      openModal(loginModal);
-    });
-
-    openRegister?.addEventListener("click", () => {
-      loginModal.classList.add("hidden");
-      openModal(registerModal);
-    });
-
-    openLogin?.addEventListener("click", () => {
-      registerModal.classList.add("hidden");
-      openModal(loginModal);
-    });
-
-    overlay.addEventListener("click", closeModals);
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeModals();
-    });
-
-    document.addEventListener("click", (event) => {
-      const clickedInside = loginModal.contains(event.target) || registerModal.contains(event.target);
-      const clickedEntrance = event.target.closest(".entrance");
-      if (!clickedInside && !clickedEntrance && !event.target.closest("#overlay")) {
-        return;
-      }
-    });
-  }
-
-  function buildCard(product) {
-    const card = document.createElement("article");
-    card.className = "product-card";
-
-    const image = product.image || "";
-    const title = product.name || "Без названия";
-    const description = product.description || "";
-    const priceText = product.price_text || formatPrice(product.price_value || 0);
-    const category = product.category || "";
-
-    card.innerHTML = `
-      <img src="${image}" alt="${title}">
-      <div class="product-body">
-        <span class="badge">${category}</span>
-        <h3>${title}</h3>
-        <p class="product-description">${description}</p>
-        <p class="price">${priceText}</p>
-        <div class="card-actions">
-          <button type="button" class="add-to-cart" data-title="${escapeHtml(title)}" data-price="${escapeHtml(String(priceText))}" data-image="${escapeHtml(image)}">В корзину</button>
-        </div>
-      </div>
-    `;
-
-    card.querySelector(".add-to-cart")?.addEventListener("click", () => {
       const cart = getCart();
       const existing = cart.find((item) => item.title === title);
       if (existing) {
         existing.quantity += 1;
       } else {
-        cart.push({
-          title,
-          price_text: priceText,
-          price_value: toNumber(priceText),
-          image,
-          quantity: 1,
-        });
+        cart.push({ title, price_text: priceText, price_value: priceValue, image, quantity: 1 });
       }
       saveCart(cart);
-    });
-
-    return card;
-  }
-
-  function renderProducts(products) {
-    const container = document.getElementById("productList");
-    if (!container) return;
-    container.innerHTML = "";
-    if (!products.length) {
-      container.innerHTML = `<div class="flash">Ничего не найдено.</div>`;
-      return;
-    }
-    products.forEach((product) => container.appendChild(buildCard(product)));
-  }
-
-  async function loadProducts() {
-    const container = document.getElementById("productList");
-    if (!container) return;
-
-    const params = new URLSearchParams(window.location.search);
-    const selectedCategory = container.dataset.selectedCategory || params.get("category") || "semenaO";
-    const searchQuery = container.dataset.search || params.get("search") || "";
-    const endpoint = container.dataset.apiUrl || "/api/products";
-
-    const url = new URL(endpoint, window.location.origin);
-    url.searchParams.set("category", selectedCategory);
-    if (searchQuery) url.searchParams.set("search", searchQuery);
-
-    try {
-      const response = await fetch(url.toString());
-      const products = await response.json();
-      renderProducts(Array.isArray(products) ? products : []);
-    } catch (error) {
-      container.innerHTML = `<div class="flash">Не удалось загрузить товары.</div>`;
-    }
-  }
-
-  function initSearch() {
-    const searchForm = document.getElementById("searchForm");
-    const searchInput = document.getElementById("searchInput");
-    if (!searchForm || !searchInput) return;
-
-    const params = new URLSearchParams(window.location.search);
-    const category = params.get("category") || searchForm.querySelector('input[name="category"]')?.value || "semenaO";
-    searchForm.querySelector('input[name="category"]')?.setAttribute("value", category);
-
-    searchForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const query = searchInput.value.trim();
-      const url = new URL(window.location.origin + window.location.pathname);
-      url.searchParams.set("category", category);
-      if (query) url.searchParams.set("search", query);
-      window.location.href = url.toString();
-    });
-  }
-
-  function initCatalogLinks() {
-    document.querySelectorAll(".catalog-menu a").forEach((link) => {
-      link.addEventListener("click", () => {
-        document.querySelector(".catalog-menu").style.display = "none";
-      });
+      button.textContent = "Добавлено";
+      window.setTimeout(() => {
+        button.textContent = "В корзину";
+      }, 900);
     });
   }
 
@@ -236,21 +83,23 @@
     let total = 0;
 
     cart.forEach((item, index) => {
-      const itemTotal = (item.price_value || toNumber(item.price_text)) * item.quantity;
+      const itemPrice = Number(item.price_value || 0);
+      const quantity = Number(item.quantity || 1);
+      const itemTotal = itemPrice * quantity;
       total += itemTotal;
 
       const row = document.createElement("div");
       row.className = "cart-item";
       row.innerHTML = `
-        <img src="${item.image}" alt="${item.title}">
+        <img src="${item.image || "/static/images/icon.png"}" alt="${item.title}">
         <div>
           <h3>${item.title}</h3>
-          <p>${item.price_text}</p>
+          <p>${item.price_text || formatPrice(itemPrice)}</p>
           <p>Сумма: ${formatPrice(itemTotal)}</p>
         </div>
         <div class="qty-controls">
           <button type="button" class="qty-btn" data-action="minus">−</button>
-          <span>${item.quantity}</span>
+          <span>${quantity}</span>
           <button type="button" class="qty-btn" data-action="plus">+</button>
           <button type="button" class="delete-btn">Удалить</button>
         </div>
@@ -261,9 +110,7 @@
         const current = currentCart[index];
         if (!current) return;
         current.quantity -= 1;
-        if (current.quantity <= 0) {
-          currentCart.splice(index, 1);
-        }
+        if (current.quantity <= 0) currentCart.splice(index, 1);
         saveCart(currentCart);
         renderBasket();
       });
@@ -288,28 +135,15 @@
     });
 
     totalPrice.textContent = `Итого: ${formatPrice(total)}`;
-    buyBtn.addEventListener("click", () => {
-      alert("Этап оформления заказа будет добавлен на следующем шаге.");
-    }, { once: true });
-  }
-
-  function escapeHtml(value) {
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+    buyBtn.onclick = () => {
+      alert("Оформление заказа можно добавить следующим шагом.");
+    };
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     initTheme();
-    initCatalogMenu();
-    initAuthModals();
-    initSearch();
-    initCatalogLinks();
     updateCartCount();
-    loadProducts();
+    attachCartButtons();
     renderBasket();
 
     const themeToggle = document.getElementById("themeToggle");
@@ -319,4 +153,4 @@
       themeToggle.textContent = isDark ? "☀️" : "🌙";
     });
   });
-}();
+})();

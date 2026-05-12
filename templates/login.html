@@ -1,24 +1,23 @@
 {% extends "base.html" %}
 {% block title %}Вход{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ADstyle.css') }}">{% endblock %}
 {% block content %}
-<div class="form-container">
-    <h2>Вход в аккаунт</h2>
+<div class="form-container auth-card">
+    <h2>Вход</h2>
     <form method="POST" novalidate>
         {{ form.hidden_tag() }}
         <div class="form-group">
-            {{ form.username.label }} {{ form.username(size=32) }}
-            {% for error in form.username.errors %}
-                <span class="error">{{ error }}</span>
-            {% endfor %}
+            {{ form.username.label }}
+            {{ form.username(size=32, placeholder='Логин') }}
+            {% for error in form.username.errors %}<div class="error">{{ error }}</div>{% endfor %}
         </div>
         <div class="form-group">
-            {{ form.password.label }} {{ form.password(size=32) }}
-            {% for error in form.password.errors %}
-                <span class="error">{{ error }}</span>
-            {% endfor %}
+            {{ form.password.label }}
+            {{ form.password(size=32, placeholder='Пароль') }}
+            {% for error in form.password.errors %}<div class="error">{{ error }}</div>{% endfor %}
         </div>
-        {{ form.submit(class="btn-primary") }}
+        {{ form.submit(class="save-btn") }}
     </form>
-    <p>Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрироваться</a></p>
+    <p class="auth-switch">Нет аккаунта? <a href="{{ url_for('main.register') }}">Зарегистрироваться</a></p>
 </div>
 {% endblock %}

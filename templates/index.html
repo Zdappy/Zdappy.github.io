@@ -1,24 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Каталог товаров{% endblock %}
+{% block title %}Каталог{% endblock %}
 {% block content %}
-<h1>Товары для сада и дома</h1>
-<div class="filters">
-    <a href="{{ url_for('index') }}">Все</a>
-    {% for cat in categories %}
-        <a href="{{ url_for('index', category_id=cat.id) }}">{{ cat.title }}</a>
-    {% endfor %}
-</div>
-<div class="products-grid">
-    {% for product in products %}
-    <article class="product-card">
-        <img src="{{ product.image_url or url_for('static', filename='images/placeholder.png') }}" alt="{{ product.title }}">
-        <h3>{{ product.title }}</h3>
-        <p>{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
-        <span class="price">{{ "%.2f"|format(product.price) }} ₽</span>
-        <a href="#" class="btn-add-cart" data-id="{{ product.id }}">В корзину</a>
-    </article>
-    {% else %}
-    <p>Товары не найдены.</p>
-    {% endfor %}
-</div>
+<section class="catalog-section" id="catalog">
+    <div class="section-head">
+        <div>
+            <h2>Каталог</h2>
+        </div>
+    </div>
+
+    <form id="searchForm" class="search-form" method="get">
+        <input id="searchInput" class="search-input" type="search" name="search" placeholder="Поиск по товарам..." value="{{ request.args.get('search', '') }}">
+        <input type="hidden" name="category" value="{{ request.args.get('category', '') }}">
+        <button class="search-btn" type="submit">Найти</button>
+    </form>
+
+    <div class="filters" aria-label="Фильтр по категориям">
+        <a href="{{ url_for('main.index') }}" class="filter-chip {% if not request.args.get('category') %}active{% endif %}">Все товары</a>
+        {% for cat in categories %}
+            <a href="{{ url_for('main.index', category=cat.slug, search=request.args.get('search', '')) }}" class="filter-chip {% if request.args.get('category') == cat.slug %}active{% endif %}">{{ cat.name }}</a>
+        {% endfor %}
+    </div>
+
+    <div class="products-grid">
+        {% for product in products %}
+        <article class="product-card">
+            <img src="{{ product.image_src }}" alt="{{ product.name }}">
+            <div class="product-body">
+                <span class="badge">{{ product.category.name }}</span>
+                <h3>{{ product.name }}</h3>
+                <p class="product-description">{{ product.description }}</p>
+                <p class="price">{{ "%.0f"|format(product.price) }} ₽</p>
+                <div class="card-actions">
+                    <button type="button" class="add-to-cart"
+                            data-title="{{ product.name }}"
+                            data-price="{{ "%.0f"|format(product.price) }} ₽"
+                            data-price-value="{{ product.price }}"
+                            data-image="{{ product.image_src }}">
+                        В корзину
+                    </button>
+                </div>
+            </div>
+        </article>
+        {% else %}
+        <div class="flash">Товары пока не добавлены.</div>
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}
