@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}403{% endblock %}
+{% block title %}403 - Доступ запрещен{% endblock %}
+
 {% block content %}
-<section class="error-page">
-    <p class="hero-kicker">Ошибка 403</p>
+<div class="error-page">
     <h1>403</h1>
-    <p>Доступ к этой странице ограничен.</p>
-    <a class="hero-button" href="{{ url_for('main.index') }}">Вернуться в каталог</a>
-</section>
+    <p>Доступ к этой странице ограничен. У вас недостаточно прав для просмотра.</p>
+    <a href="{{ url_for('main.index') }}" class="btn-back">Вернуться в каталог</a>
+</div>
 {% endblock %}

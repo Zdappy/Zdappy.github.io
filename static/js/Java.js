@@ -3,154 +3,94 @@
   const THEME_KEY = "zdappy_theme";
 
   function getCart() {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(CART_KEY));
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
+    try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { return []; }
   }
-
   function saveCart(cart) {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
     updateCartCount();
   }
-
-  function formatPrice(value) {
-    const number = Number(value) || 0;
-    return `${Math.round(number)} ₽`;
-  }
-
+  function formatPrice(v) { return `${Math.round(Number(v)||0)} ₽`; }
   function updateCartCount() {
-    const countEl = document.getElementById("cartCount");
-    if (!countEl) return;
-    const count = getCart().reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-    countEl.textContent = String(count);
+    const el = document.getElementById("cartCount");
+    if(el) {
+      const cart = getCart();
+      el.textContent = cart.reduce((s,i)=>s+(i.quantity||0),0);
+    }
   }
 
   function applyTheme(theme) {
     const isDark = theme === "dark";
     document.body.classList.toggle("dark-theme", isDark);
-    const toggle = document.getElementById("themeToggle");
-    if (toggle) toggle.textContent = isDark ? "☀️" : "🌙";
-    localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
-  }
-
-  function initTheme() {
-    applyTheme(localStorage.getItem(THEME_KEY) || "light");
-  }
-
-  function attachCartButtons() {
-    document.addEventListener("click", (event) => {
-      const button = event.target.closest(".add-to-cart");
-      if (!button) return;
-
-      const title = button.dataset.title || "Без названия";
-      const image = button.dataset.image || "/static/images/icon.png";
-      const priceText = button.dataset.price || formatPrice(button.dataset.priceValue || 0);
-      const priceValue = Number(button.dataset.priceValue || 0);
-
-      const cart = getCart();
-      const existing = cart.find((item) => item.title === title);
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        cart.push({ title, price_text: priceText, price_value: priceValue, image, quantity: 1 });
-      }
-      saveCart(cart);
-      button.textContent = "Добавлено";
-      window.setTimeout(() => {
-        button.textContent = "В корзину";
-      }, 900);
-    });
-  }
-
-  function renderBasket() {
-    const container = document.getElementById("cartItems");
-    const totalPrice = document.getElementById("totalPrice");
-    const buyBtn = document.getElementById("buyBtn");
-    if (!container || !totalPrice || !buyBtn) return;
-
-    const cart = getCart();
-    container.innerHTML = "";
-
-    if (!cart.length) {
-      container.innerHTML = `<div class="flash">Корзина пустая.</div>`;
-      totalPrice.textContent = "Итого: 0 ₽";
-      return;
-    }
-
-    let total = 0;
-
-    cart.forEach((item, index) => {
-      const itemPrice = Number(item.price_value || 0);
-      const quantity = Number(item.quantity || 1);
-      const itemTotal = itemPrice * quantity;
-      total += itemTotal;
-
-      const row = document.createElement("div");
-      row.className = "cart-item";
-      row.innerHTML = `
-        <img src="${item.image || "/static/images/icon.png"}" alt="${item.title}">
-        <div>
-          <h3>${item.title}</h3>
-          <p>${item.price_text || formatPrice(itemPrice)}</p>
-          <p>Сумма: ${formatPrice(itemTotal)}</p>
-        </div>
-        <div class="qty-controls">
-          <button type="button" class="qty-btn" data-action="minus">−</button>
-          <span>${quantity}</span>
-          <button type="button" class="qty-btn" data-action="plus">+</button>
-          <button type="button" class="delete-btn">Удалить</button>
-        </div>
-      `;
-
-      row.querySelector('[data-action="minus"]')?.addEventListener("click", () => {
-        const currentCart = getCart();
-        const current = currentCart[index];
-        if (!current) return;
-        current.quantity -= 1;
-        if (current.quantity <= 0) currentCart.splice(index, 1);
-        saveCart(currentCart);
-        renderBasket();
-      });
-
-      row.querySelector('[data-action="plus"]')?.addEventListener("click", () => {
-        const currentCart = getCart();
-        const current = currentCart[index];
-        if (!current) return;
-        current.quantity += 1;
-        saveCart(currentCart);
-        renderBasket();
-      });
-
-      row.querySelector(".delete-btn")?.addEventListener("click", () => {
-        const currentCart = getCart();
-        currentCart.splice(index, 1);
-        saveCart(currentCart);
-        renderBasket();
-      });
-
-      container.appendChild(row);
-    });
-
-    totalPrice.textContent = `Итого: ${formatPrice(total)}`;
-    buyBtn.onclick = () => {
-      alert("Оформление заказа можно добавить следующим шагом.");
-    };
+    const btn = document.getElementById("themeToggle");
+    if(btn) btn.textContent = isDark ? "☀️" : "🌙";
+    localStorage.setItem(THEME_KEY, theme);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    initTheme();
-    updateCartCount();
-    attachCartButtons();
-    renderBasket();
-
-    const themeToggle = document.getElementById("themeToggle");
-    themeToggle?.addEventListener("click", () => {
-      const isDark = document.body.classList.toggle("dark-theme");
-      localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
-      themeToggle.textContent = isDark ? "☀️" : "🌙";
+    // Инициализация темы
+    applyTheme(localStorage.getItem(THEME_KEY) || "light");
+    
+    // Переключатель темы
+    document.getElementById("themeToggle")?.addEventListener("click", () => {
+      const isDark = !document.body.classList.contains("dark-theme");
+      applyTheme(isDark ? "dark" : "light");
     });
+
+    // Кнопки "В корзину"
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".add-to-cart");
+      if(!btn) return;
+      const cart = getCart();
+      const id = btn.dataset.id;
+      const existing = cart.find(i => i.id == id);
+      if(existing) existing.quantity++;
+      else cart.push({id, title: btn.dataset.title, price_value: parseFloat(btn.dataset.price), quantity: 1, image: btn.dataset.image});
+      saveCart(cart);
+      btn.textContent = "✅"; setTimeout(()=>btn.textContent="В корзину", 800);
+    });
+
+    // Корзина
+    const container = document.getElementById("cartItems");
+    const totalEl = document.getElementById("totalPrice");
+    if(container && totalEl) {
+      const cart = getCart();
+      container.innerHTML = "";
+      if(!cart.length) {
+        container.innerHTML = '<div class="flash flash-info">Корзина пуста.</div>';
+        totalEl.textContent = "Итого: 0 ₽";
+      } else {
+        let total = 0;
+        cart.forEach((item, idx) => {
+          total += (item.price_value||0) * item.quantity;
+          const row = document.createElement("div");
+          row.className = "cart-item";
+          row.innerHTML = `
+            <img src="${item.image||'/static/images/icon.png'}">
+            <div><h3>${item.title}</h3><p>${formatPrice(item.price_value)} ₽</p></div>
+            <div class="qty-controls">
+              <button class="qty-btn" data-act="minus" data-idx="${idx}">−</button>
+              <span>${item.quantity}</span>
+              <button class="qty-btn" data-act="plus" data-idx="${idx}">+</button>
+              <button class="delete-btn" data-idx="${idx}">🗑️</button>
+            </div>`;
+          container.appendChild(row);
+        });
+        totalEl.textContent = `Итого: ${formatPrice(total)}`;
+        
+        container.addEventListener("click", (e) => {
+          const btn = e.target.closest("button");
+          if(!btn) return;
+          const idx = Number(btn.dataset.idx);
+          const act = btn.dataset.act;
+          const c = getCart();
+          if(act==="minus") { c[idx].quantity--; if(c[idx].quantity<=0) c.splice(idx,1); }
+          else if(act==="plus") c[idx].quantity++;
+          else c.splice(idx,1);
+          saveCart(c);
+          location.reload();
+        });
+      }
+    }
+    document.getElementById("buyBtn")?.addEventListener("click", ()=>alert("Оформление заказа"));
   });
 })();

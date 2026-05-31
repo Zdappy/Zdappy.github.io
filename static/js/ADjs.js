@@ -1,58 +1,56 @@
 (() => {
   const fieldsByCategory = {
-    semenaO: ["Категория", "Тип растения", "Срок созревания", "Условия выращивания", "Форма плода", "Цвет плода", "Вес плода", "Урожайность"],
-    ovoshi: ["Категория", "Тип растения", "Срок созревания", "Условия выращивания", "Форма плода", "Цвет плода", "Вес плода", "Урожайность"],
-    cvety: ["Тип растения", "Категория", "Видовое название", "Разновидность", "Высота растения", "Диаметр куста", "Диаметр цветка", "Окраска цветка", "Способ выращивания", "Объем кашпо", "Схема посадки"],
-    semenaC: ["Тип растения", "Категория", "Видовое название", "Разновидность", "Высота растения", "Диаметр куста", "Диаметр цветка", "Окраска цветка", "Способ выращивания", "Объем кашпо", "Схема посадки"],
+    semenaO: ["Тип растения", "Срок созревания", "Условия выращивания", "Форма плода", "Цвет плода", "Вес плода", "Урожайность"],
+    ovoshi: ["Тип растения", "Срок созревания", "Условия выращивания", "Форма плода", "Цвет плода", "Вес плода", "Урожайность"],
+    cvety: ["Видовое название", "Разновидность", "Высота растения", "Диаметр куста", "Диаметр цветка", "Окраска цветка", "Способ выращивания", "Объем кашпо", "Схема посадки"],
+    semenaC: ["Видовое название", "Разновидность", "Высота растения", "Диаметр куста", "Диаметр цветка", "Окраска цветка", "Способ выращивания", "Объем кашпо", "Схема посадки"],
     posadochny_material: []
   };
 
   function updateFields() {
     const select = document.getElementById("category");
-    const container = document.getElementById("characteristicsContainer");
+    const container = document.getElementById("characteristics-container");
     if (!select || !container) return;
 
     const fields = fieldsByCategory[select.value] || [];
     container.innerHTML = "";
 
-    fields.forEach((field) => {
+    fields.forEach((field, index) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "form-group dynamic-field";
+
       const label = document.createElement("label");
       label.textContent = field;
+      label.setAttribute("for", `char_${index}`);
 
       const input = document.createElement("input");
       input.type = "text";
-      input.required = true;
+      input.name = `characteristics[${index}]`; // Ключ для Flask
+      input.id = `char_${index}`;
       input.placeholder = field;
+      input.className = "form-control";
 
-      container.appendChild(label);
-      container.appendChild(input);
+      wrapper.appendChild(label);
+      wrapper.appendChild(input);
+      container.appendChild(wrapper);
     });
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     const category = document.getElementById("category");
-    const form = document.getElementById("productForm");
-    const message = document.getElementById("message");
-    const image = document.getElementById("image");
+    const imageInput = document.getElementById("image");
+    const messageEl = document.getElementById("upload-message");
 
-    if (!category || !form || !message) return;
-
-    category.addEventListener("change", updateFields);
-    updateFields();
-
-    image?.addEventListener("change", () => {
-      message.textContent = image.files?.[0] ? `Выбран файл: ${image.files[0].name}` : "";
-      message.style.color = "var(--secondary)";
-    });
-
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      message.textContent = "Черновик товара сохранен. Следующий шаг — подключение БД и API.";
-      message.style.color = "var(--primary)";
-    });
-
-    if (localStorage.getItem("zdappy_theme") === "dark") {
-      document.body.classList.add("dark-theme");
+    if (category) {
+      category.addEventListener("change", updateFields);
+      updateFields(); // Инициализация при загрузке
     }
+
+    imageInput?.addEventListener("change", () => {
+      if (messageEl) {
+        messageEl.textContent = imageInput.files?.[0] ? `Выбран файл: ${imageInput.files[0].name}` : "";
+        messageEl.style.color = "var(--success-color, green)";
+      }
+    });
   });
 })();

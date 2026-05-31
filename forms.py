@@ -2,15 +2,12 @@ from __future__ import annotations
 from flask_wtf import FlaskForm
 from wtforms import FloatField, PasswordField, SelectField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, NumberRange, ValidationError
-
 from models import Category, User
-
 
 class LoginForm(FlaskForm):
     username = StringField("Имя пользователя", validators=[DataRequired(), Length(min=3, max=80)])
     password = PasswordField("Пароль", validators=[DataRequired(), Length(min=3, max=128)])
     submit = SubmitField("Войти")
-
 
 class RegistrationForm(FlaskForm):
     username = StringField("Имя пользователя", validators=[DataRequired(), Length(min=3, max=80)])
@@ -25,7 +22,6 @@ class RegistrationForm(FlaskForm):
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError("Такой email уже зарегистрирован.")
-
 
 class ProductForm(FlaskForm):
     name = StringField("Название товара", validators=[DataRequired(), Length(min=2, max=200)])

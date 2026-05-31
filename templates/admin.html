@@ -1,25 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Админка{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ADstyle.css') }}">{% endblock %}
+{% block title %}Админ-панель{% endblock %}
 {% block content %}
-<section class="form-container admin-card">
+<div class="admin-card">
     <div class="admin-head">
-        <div>
-            <p class="form-kicker">Управление каталогом</p>
-            <h1>Админ-панель</h1>
-            <p class="form-note">Добавление, редактирование и удаление товаров из базы.</p>
-        </div>
+        <h1>Управление каталогом</h1>
         <div class="admin-actions">
-            <a href="{{ url_for('main.add_product') }}" class="save-btn inline-btn">Добавить товар</a>
-            <a href="{{ url_for('main.index') }}" class="back-btn inline-btn">На главную</a>
+            <a href="{{ url_for('main.add_product') }}" class="top-link" style="background:var(--brand);color:#fff;">+ Добавить товар</a>
+            <a href="{{ url_for('main.index') }}" class="top-link">На сайт</a>
         </div>
     </div>
-
+    
     <div class="table-wrap">
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Изображение</th>
                     <th>Название</th>
                     <th>Цена</th>
                     <th>Категория</th>
@@ -27,27 +22,29 @@
                 </tr>
             </thead>
             <tbody>
-                {% for product in products %}
+                {% for p in products %}
                 <tr>
-                    <td data-label="ID">{{ product.id }}</td>
-                    <td data-label="Название">{{ product.name }}</td>
-                    <td data-label="Цена">{{ "%.0f"|format(product.price) }} ₽</td>
-                    <td data-label="Категория">{{ product.category.name }}</td>
-                    <td data-label="Действия">
-                        <div class="row-actions">
-                            <a class="top-link action-link" href="{{ url_for('main.edit_product', product_id=product.id) }}">Изменить</a>
-                            <form method="POST" action="{{ url_for('main.delete_product', product_id=product.id) }}" onsubmit="return confirm('Удалить товар?');">
-                                {{ csrf_token() }}
-                                <button type="submit" class="delete-mini">Удалить</button>
-                            </form>
-                        </div>
+                    <td data-label="Изображение">
+                        <img src="{{ p.image_src }}" alt="{{ p.name }}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;">
+                    </td>
+                    <td data-label="Название">{{ p.name }}</td>
+                    <td data-label="Цена">{{ "%.0f"|format(p.price) }} ₽</td>
+                    <td data-label="Категория">{{ p.category.name }}</td>
+                    <td data-label="Действия" class="row-actions">
+                        <a href="{{ url_for('main.edit_product', product_id=p.id) }}" class="top-link" style="min-width:auto;padding:8px 12px;">Изменить</a>
+                        <form method="POST" action="{{ url_for('main.delete_product', product_id=p.id) }}" style="display:inline;" onsubmit="return confirm('Удалить товар?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="delete-mini">Удалить</button>
+                        </form>
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="5" class="empty-row">Товаров пока нет.</td></tr>
+                <tr>
+                    <td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Товаров пока нет</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-</section>
+</div>
 {% endblock %}

@@ -1,72 +1,36 @@
-"""Application entry point."""
-
 from __future__ import annotations
-
-import json
 import os
-import re
-from pathlib import Path
-
+import logging
 from flask import Flask
-
 from extensions import csrf, db, login_manager
 from models import Category, Product, User
 from routes import bp
 
-BRAND_NAME = "NewEra"
+BRAND_NAME = "Новая Эра"
+logging.basicConfig(level=logging.INFO)
 
-
-def _parse_price(value) -> float:
-    if value is None:
-        return 0.0
-    if isinstance(value, (int, float)):
-        return float(value)
-    match = re.search(r"[\d.,]+", str(value))
-    if not match:
-        return 0.0
-    return float(match.group(0).replace(",", "."))
-
-
-def _seed_products(app: Flask) -> None:
-    goods_dir = Path(app.root_path) / "static" / "goods"
-    category_files = [
-        ("semenaO", "Семена овощей", "semenaO.json"),
-        ("cvety", "Цветы", "cvety.json"),
-        ("ovoshi", "Овощи", "ovoshi.json"),
-        ("posadochny_material", "Посадочный материал", "posadochny_material.json"),
-    ]
-
-    categories: dict[str, Category] = {}
-    for slug, name, _ in category_files:
-        category = Category.query.filter_by(slug=slug).first()
-        if not category:
-            category = Category(slug=slug, name=name)
-            db.session.add(category)
-            db.session.flush()
-        categories[slug] = category
-
-    db.session.commit()
-
-    if Product.query.first():
+def _seed_initial_data() -> None:
+    if Category.query.first():
         return
+    cats = [
+        Category(slug="semenaO", name="Семена овощей"),
+        Category(slug="cvety", name="Цветы"),
+        Category(slug="ovoshi", name="Овощи"),
+        Category(slug="posadochny_material", name="Посадочный материал"),
+    ]
+    for cat in cats:
+        db.session.add(cat)
+    db.session.flush()
 
-    for slug, _, filename in category_files:
-        path = goods_dir / filename
-        if not path.exists():
-            continue
-        with path.open(encoding="utf-8") as fh:
-            items = json.load(fh)
-        for item in items:
-            product = Product(
-                name=item.get("название") or "Без названия",
-                description=item.get("описание") or "",
-                price=_parse_price(item.get("цена")),
-                image_url=item.get("изображение") or None,
-                category_id=categories[slug].id,
-            )
-            db.session.add(product)
+    seeds_id = Category.query.filter_by(slug="semenaO").first().id
+    flowers_id = Category.query.filter_by(slug="cvety").first().id
+    
+    db.session.add_all([
+        Product(name="Томат Розовый мед", description="Ранний сорт для теплицы и открытого грунта.", price=79.0, category_id=seeds_id),
+        Product(name="Огурец Дружок", description="Стабильный урожай и хороший вкус для свежих салатов.", price=65.0, category_id=seeds_id),
+        Product(name="Петуния Микс", description="Яркое цветение весь сезон, подходит для клумб и кашпо.", price=54.0, category_id=flowers_id),
+    ])
     db.session.commit()
-
 
 def _create_admin_user() -> None:
     admin = User.query.filter_by(username="admin").first()
@@ -80,15 +44,14 @@ def _create_admin_user() -> None:
     db.session.add(admin)
     db.session.commit()
 
-
 def create_app() -> Flask:
     app = Flask(__name__, instance_relative_config=True)
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-prod")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///shop.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["BRAND_NAME"] = BRAND_NAME
-
     os.makedirs(app.instance_path, exist_ok=True)
+
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
@@ -103,14 +66,12 @@ def create_app() -> Flask:
 
     with app.app_context():
         db.create_all()
-        _seed_products(app)
+        _seed_initial_data()
         _create_admin_user()
 
     return app
 
-
 app = create_app()
-
 
 if __name__ == "__main__":
     app.run(debug=True)

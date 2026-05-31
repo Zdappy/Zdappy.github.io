@@ -1,19 +1,12 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %}Корзина{% endblock %}
 {% block content %}
-<section class="cart-container">
-  <div class="section-head">
-    <div>
-      <p class="hero-kicker">Покупки</p>
-      <h1>Корзина</h1>
+<div class="cart-container">
+    <h2>Корзина</h2>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-summary">
+        <h3 id="totalPrice">Итого: 0 ₽</h3>
+        <button id="buyBtn" class="buy-btn">Оформить</button>
     </div>
-  </div>
-
-  <div id="cartItems" class="cart-items"></div>
-
-  <div class="cart-summary">
-    <h2 id="totalPrice">Итого: 0 ₽</h2>
-    <button class="buy-btn" type="button" id="buyBtn">Купить</button>
-  </div>
-</section>
+</div>
 {% endblock %}
