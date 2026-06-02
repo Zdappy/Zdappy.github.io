@@ -4,7 +4,7 @@ from flask import Blueprint, abort, flash, jsonify, redirect, render_template, r
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import or_
 from extensions import db, login_manager
-from forms import LoginForm, ProductForm, RegistrationForm
+from forms import LoginForm, ProductForm, RegistrationForm, ProfileEditForm, ChangePasswordForm
 from models import Category, Product, User
 
 bp = Blueprint("main", __name__)
@@ -46,11 +46,12 @@ def login():
     if current_user.is_authenticated: return redirect(url_for("main.index"))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        login_value = form.login.data.strip()
+        user = User.query.filter(or_(User.username == login_value, User.email == login_value)).first()
         if user and user.check_password(form.password.data):
             login_user(user)
             return redirect(request.args.get("next") or url_for("main.index"))
-        flash("Неверный логин или пароль.", "error")
+        flash("Неверный логин/email или пароль.", "error")
     elif request.method == "POST": _flash_errors(form)
     return render_template("login.html", form=form)
 
@@ -59,7 +60,10 @@ def register():
     if current_user.is_authenticated: return redirect(url_for("main.index"))
     form = RegistrationForm()
     if form.validate_on_submit():
-        u = User(username=form.username.data.strip(), email=form.email.data.strip())
+        username = form.name.data.strip().lower() + "_" + form.surname.data.strip().lower()
+        u = User(username=username, email=form.email.data.strip(), 
+                 surname=form.surname.data.strip(), name=form.name.data.strip(), 
+                 patronymic=form.patronymic.data.strip() or "")
         u.set_password(form.password.data)
         db.session.add(u); db.session.commit()
         flash("Регистрация успешна. Войдите.", "success")
@@ -72,6 +76,32 @@ def register():
 def logout():
     logout_user(); flash("Вы вышли.", "info")
     return redirect(url_for("main.index"))
+
+@bp.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    edit_form = ProfileEditForm(obj=current_user)
+    password_form = ChangePasswordForm()
+    
+    if edit_form.validate_on_submit():
+        current_user.surname = edit_form.surname.data.strip()
+        current_user.name = edit_form.name.data.strip()
+        current_user.patronymic = edit_form.patronymic.data.strip() or ""
+        current_user.email = edit_form.email.data.strip()
+        db.session.commit()
+        flash("Данные обновлены.", "success")
+        return redirect(url_for("main.profile"))
+    
+    if password_form.validate_on_submit():
+        if current_user.check_password(password_form.old_password.data):
+            current_user.set_password(password_form.new_password.data)
+            db.session.commit()
+            flash("Пароль изменен.", "success")
+            return redirect(url_for("main.profile"))
+        else:
+            flash("Неверный текущий пароль.", "error")
+    
+    return render_template("profile.html", edit_form=edit_form, password_form=password_form)
 
 @bp.route("/basket")
 def basket():

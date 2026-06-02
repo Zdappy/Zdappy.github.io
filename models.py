@@ -12,6 +12,10 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    surname = db.Column(db.String(80), nullable=True)
+    name = db.Column(db.String(80), nullable=True)
+    patronymic = db.Column(db.String(80), nullable=True)
 
     def set_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(password)

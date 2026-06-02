@@ -22,15 +22,18 @@
         <nav class="top-nav">
             <a href="{{ url_for('main.index') }}" class="top-link">Каталог</a>
             <a href="{{ url_for('main.basket') }}" class="top-link">Корзина</a>
+            
             {% if current_user.is_authenticated %}
                 {% if current_user.is_admin %}
                     <a href="{{ url_for('main.admin') }}" class="top-link">Админка</a>
                 {% endif %}
-                <span class="top-link">{{ current_user.username }}</span>
+                
+                <a href="{{ url_for('main.profile') }}" class="top-link">{{ current_user.username }}</a>
                 <a href="{{ url_for('main.logout') }}" class="top-link">Выйти</a>
             {% else %}
                 <a href="{{ url_for('main.login') }}" class="top-link">Войти</a>
             {% endif %}
+            
             <button id="themeToggle" class="switch-btn">🌙</button>
         </nav>
     </div>
