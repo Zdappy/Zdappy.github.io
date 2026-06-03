@@ -41,6 +41,11 @@ class Product(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     category = db.relationship("Category", back_populates="products", lazy="selectin")
+    extra_images = db.relationship('ProductImage',
+                                   backref='product',
+                                   lazy='dynamic',
+                                   cascade='all, delete-orphan',
+                                   order_by='ProductImage.order')
 
     def _resolve_image_url(self) -> str:
         if not self.image_url or not self.image_url.strip():
@@ -65,3 +70,13 @@ class Product(db.Model):
             "category": self.category.slug if self.category else None,
             "category_name": self.category.name if self.category else None,
         }
+
+
+class ProductImage(db.Model):
+    __tablename__ = 'product_images'
+
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id', ondelete='CASCADE'), nullable=False)
+    url = db.Column(db.String(300), nullable=False)  # путь к файлу (например, /static/uploads/123.jpg)
+    order = db.Column(db.Integer, default=0)  # порядок сортировки
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

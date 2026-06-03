@@ -1,5 +1,6 @@
 from __future__ import annotations
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed, MultipleFileField
 from wtforms import FloatField, PasswordField, SelectField, StringField, SubmitField, TextAreaField, EmailField
 from wtforms.validators import DataRequired, Email, Length, NumberRange, ValidationError, EqualTo
 from models import Category, User
@@ -23,12 +24,13 @@ class RegistrationForm(FlaskForm):
             raise ValidationError("Такой email уже зарегистрирован.")
 
 class ProductForm(FlaskForm):
-    name = StringField("Название товара", validators=[DataRequired(), Length(min=2, max=200)])
-    description = TextAreaField("Описание", validators=[DataRequired(), Length(min=10)])
-    price = FloatField("Цена", validators=[DataRequired(), NumberRange(min=0)])
-    image_url = StringField("Путь к изображению", validators=[Length(max=255)])
-    category = SelectField("Категория", coerce=int, validators=[DataRequired()])
-    submit = SubmitField("Сохранить")
+    name = StringField('Название', validators=[DataRequired()])
+    description = TextAreaField('Описание', validators=[DataRequired()])
+    price = FloatField('Цена', validators=[DataRequired()])
+    category = SelectField('Категория', coerce=int, validators=[DataRequired()])
+    image_url = StringField('URL изображения (опционально)')
+    main_image = FileField('Основное изображение', validators=[FileAllowed(['jpg','png','jpeg','gif','webp'], 'Только изображения!')])
+    extra_images = MultipleFileField('Дополнительные изображения', validators=[FileAllowed(['jpg','png','jpeg','gif','webp'], 'Только изображения!')])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
