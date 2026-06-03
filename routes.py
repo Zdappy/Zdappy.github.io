@@ -157,6 +157,11 @@ def delete_product(product_id: int):
 def api_products():
     return jsonify([p.to_dict() for p in _product_query().all()]), 200
 
+@bp.route("/product/<int:product_id>")
+def product_detail(product_id):
+    product = Product.query.get_or_404(product_id)
+    return render_template('product_page.html', product=product)
+
 @bp.app_errorhandler(403)
 def forbidden(e): return render_template("errors/403.html"), 403
 @bp.app_errorhandler(404)

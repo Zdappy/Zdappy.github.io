@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="product-page-container">
+    
+    <a href="{{ url_for('main.index') }}" class="back-btn">
+        ← Назад в каталог
+    </a>
+
+    <div class="product-detail-wrapper">
+        
+        <div class="product-image-block">
+            <img src="{{ product.image_src }}" alt="{{ product.name }}" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        </div>
+
+        <div class="product-info-block">
+            <span class="badge2">
+                {{ product.category.name }}
+            </span>
+            
+            <h1 style="font-size: 2.5rem; margin: 15px 0;">{{ product.name }}</h1>
+            
+            <p class="price">
+                {{ "%.0f"|format(product.price) }} ₽
+            </p>
+            
+            <div class="product-description">
+                <h3>Описание товара</h3>
+                <p>{{ product.description }}</p>
+            </div>
+
+            <button class="add-to-cart" 
+                    data-id="{{ product.id }}" 
+                    data-title="{{ product.name }}" 
+                    data-price="{{ product.price }}" 
+                    data-image="{{ product.image_src }}">
+                Добавить в корзину
+            </button>
+        </div>
+
+
+
+        
+    </div>
+</div>
+{% endblock content %}
