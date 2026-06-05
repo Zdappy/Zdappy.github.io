@@ -64,10 +64,4 @@
 - Наследование шаблонов: единый `base.html` с вынесенными header, footer и навигацией.
 - Кастомный задний фон и стилизация под тематику.
 
-## Технологический стек
-- **Backend:** Python 3.10+, Flask, Jinja2
-- **База данных:** SQLite, Flask-SQLAlchemy (ORM)
-- **Auth & Security:** Flask-Login, Werkzeug, Flask-WTF (CSRF)
-- **API:** RESTful endpoints, JSON, HTTP-статусы
-- **Frontend:** HTML5, CSS3, Vanilla JS (fetch, localStorage), адаптивный дизайн
-- **Инструменты:** Git/GitHub, pip, python-dotenv
+
