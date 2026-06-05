@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width:900px;margin:0 auto;">
+    <h2 style="text-align:center;color:var(--brand);margin-bottom:30px;">ВАШ ЛИЧНЫЙ КАБИНЕТ</h2>
+    
+    <div style="display:grid;grid-template-columns:1fr;gap:40px;align-items:start;">
+        <div>
+            <h3 style="color:var(--brand);border-bottom:2px solid var(--border);padding-bottom:10px;margin-bottom:20px;">Данные пользователя</h3>
+            
+            <div style="display:grid;gap:15px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+                    <span style="color:var(--muted);min-width:120px;">Имя:</span>
+                    <span style="font-weight:600;">{{ current_user.name or 'Не указано' }}</span>
+                    <a href="#" onclick="document.getElementById('edit-name').style.display='block';this.parentElement.style.display='none';return false;" style="color:var(--brand);font-size:14px;">[ Редактировать ]</a>
+                </div>
+                <div id="edit-name" style="display:none;padding:10px 0;border-bottom:1px solid var(--border);">
+                    <form method="POST" style="display:flex;gap:10px;align-items:center;">
+                        {{ edit_form.hidden_tag() }}
+                        {{ edit_form.name(class="form-control", style="flex:1;") }}
+                        {{ edit_form.submit(class="save-btn", style="width:auto;padding:8px 16px;") }}
+                        <a href="#" onclick="this.parentElement.parentElement.style.display='none';this.parentElement.parentElement.previousElementSibling.style.display='flex';return false;" style="color:var(--muted);font-size:14px;">Отмена</a>
+                    </form>
+                </div>
+                
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+                    <span style="color:var(--muted);min-width:120px;">Фамилия:</span>
+                    <span style="font-weight:600;">{{ current_user.surname or 'Не указана' }}</span>
+                    <a href="#" onclick="document.getElementById('edit-surname').style.display='block';this.parentElement.style.display='none';return false;" style="color:var(--brand);font-size:14px;">[ Редактировать ]</a>
+                </div>
+                <div id="edit-surname" style="display:none;padding:10px 0;border-bottom:1px solid var(--border);">
+                    <form method="POST" style="display:flex;gap:10px;align-items:center;">
+                        {{ edit_form.hidden_tag() }}
+                        {{ edit_form.surname(class="form-control", style="flex:1;") }}
+                        {{ edit_form.submit(class="save-btn", style="width:auto;padding:8px 16px;") }}
+                        <a href="#" onclick="this.parentElement.parentElement.style.display='none';this.parentElement.parentElement.previousElementSibling.style.display='flex';return false;" style="color:var(--muted);font-size:14px;">Отмена</a>
+                    </form>
+                </div>
+                
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+                    <span style="color:var(--muted);min-width:120px;">Отчество:</span>
+                    <span style="font-weight:600;">{{ current_user.patronymic or 'Не указано' }}</span>
+                    <a href="#" onclick="document.getElementById('edit-patronymic').style.display='block';this.parentElement.style.display='none';return false;" style="color:var(--brand);font-size:14px;">[ Редактировать ]</a>
+                </div>
+                <div id="edit-patronymic" style="display:none;padding:10px 0;border-bottom:1px solid var(--border);">
+                    <form method="POST" style="display:flex;gap:10px;align-items:center;">
+                        {{ edit_form.hidden_tag() }}
+                        {{ edit_form.patronymic(class="form-control", style="flex:1;") }}
+                        {{ edit_form.submit(class="save-btn", style="width:auto;padding:8px 16px;") }}
+                        <a href="#" onclick="this.parentElement.parentElement.style.display='none';this.parentElement.parentElement.previousElementSibling.style.display='flex';return false;" style="color:var(--muted);font-size:14px;">Отмена</a>
+                    </form>
+                </div>
+                
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+                    <span style="color:var(--muted);min-width:120px;">E-Mail:</span>
+                    <span style="font-weight:600;">{{ current_user.email }}</span>
+                    <a href="#" onclick="document.getElementById('edit-email').style.display='block';this.parentElement.style.display='none';return false;" style="color:var(--brand);font-size:14px;">[ Редактировать ]</a>
+                </div>
+                <div id="edit-email" style="display:none;padding:10px 0;border-bottom:1px solid var(--border);">
+                    <form method="POST" style="display:flex;gap:10px;align-items:center;">
+                        {{ edit_form.hidden_tag() }}
+                        {{ edit_form.email(class="form-control", style="flex:1;") }}
+                        {{ edit_form.submit(class="save-btn", style="width:auto;padding:8px 16px;") }}
+                        <a href="#" onclick="this.parentElement.parentElement.style.display='none';this.parentElement.parentElement.previousElementSibling.style.display='flex';return false;" style="color:var(--muted);font-size:14px;">Отмена</a>
+                    </form>
+                </div>
+            </div>
+            
+            <hr style="margin:30px 0;border-color:var(--border);">
+            
+            <h3 style="color:var(--brand);border-bottom:2px solid var(--border);padding-bottom:10px;margin-bottom:20px;">Изменение пароля</h3>
+            <form method="POST">
+                {{ password_form.hidden_tag() }}
+                <div class="form-group">{{ password_form.old_password.label }} {{ password_form.old_password(class="form-control") }}
+                    {% for e in password_form.old_password.errors %}<span class="error">{{ e }}</span>{% endfor %}</div>
+                <div class="form-group">{{ password_form.new_password.label }} {{ password_form.new_password(class="form-control") }}
+                    {% for e in password_form.new_password.errors %}<span class="error">{{ e }}</span>{% endfor %}</div>
+                <div class="form-group">{{ password_form.new_password_confirm.label }} {{ password_form.new_password_confirm(class="form-control") }}
+                    {% for e in password_form.new_password_confirm.errors %}<span class="error">{{ e }}</span>{% endfor %}</div>
+                {{ password_form.submit(class="save-btn") }}
+            </form>
+            
+            <hr style="margin:30px 0;border-color:var(--border);">
+            
+            <h3 style="color:var(--brand);border-bottom:2px solid var(--border);padding-bottom:10px;margin-bottom:20px;">История заказов</h3>
+            <p style="color:var(--muted);text-align:center;padding:20px;">Заказов пока нет</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}500 - Ошибка сервера{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <h1>500</h1>
+    <p>На сервере произошла внутренняя ошибка. Попробуйте обновить страницу позже.</p>
+    <a href="{{ url_for('main.index') }}" class="btn-back">Вернуться в каталог</a>
+</div>
+{% endblock %}
