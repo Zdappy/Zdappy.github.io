@@ -1,32 +1,55 @@
 {% extends "base.html" %}
-{% block title %}{{ title }}{% endblock %}
 {% block content %}
-<div class="form-container">
-    <h2>{{ title }}</h2>
-    <form method="POST">
+<div class="admin-card">
+    <h1>{{ title }}</h1>
+    <form method="POST" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
+
         <div class="form-group">
             {{ form.name.label }} {{ form.name(class="form-control") }}
-            {% for e in form.name.errors %}<span class="error">{{ e }}</span>{% endfor %}
         </div>
         <div class="form-group">
-            {{ form.description.label }} {{ form.description(class="form-control", rows=4) }}
-            {% for e in form.description.errors %}<span class="error">{{ e }}</span>{% endfor %}
+            {{ form.description.label }} {{ form.description(class="form-control", rows=5) }}
         </div>
         <div class="form-group">
             {{ form.price.label }} {{ form.price(class="form-control") }}
-            {% for e in form.price.errors %}<span class="error">{{ e }}</span>{% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.image_url.label }} {{ form.image_url(class="form-control", placeholder="images/icon.png или URL") }}
-            {% for e in form.image_url.errors %}<span class="error">{{ e }}</span>{% endfor %}
         </div>
         <div class="form-group">
             {{ form.category.label }} {{ form.category(class="form-control") }}
-            {% for e in form.category.errors %}<span class="error">{{ e }}</span>{% endfor %}
         </div>
-        {{ form.submit(class="save-btn") }}
-        <a href="{{ url_for('main.admin') }}" class="back-btn" style="margin-left:10px;">Назад</a>
+
+        <div class="form-group">
+            {{ form.main_image.label }}<br>
+            {% if product and product.image_url %}
+                <img src="{{ product.image_url }}" style="max-width:150px; margin-bottom:10px;"><br>
+            {% endif %}
+            {{ form.main_image(class="form-control-file") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.extra_images.label }}<br>
+            {{ form.extra_images(class="form-control-file", multiple=True) }}
+        </div>
+
+        {% if product and product.extra_images %}
+        <div class="form-group">
+            <label>Существующие дополнительные изображения</label>
+            <div style="display:flex; flex-wrap:wrap; gap:15px;">
+            {% for img in product.extra_images.order_by('order') %}
+                <div style="text-align:center;">
+                    <img src="{{ img.url }}" style="width:80px; height:80px; object-fit:cover; border-radius:6px;">
+                    <br>
+                    <label>
+                        <input type="checkbox" name="delete_extra_ids" value="{{ img.id }}">
+                        Удалить
+                    </label>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>
 </div>
 {% endblock %}
