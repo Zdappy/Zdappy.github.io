@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import os
 import logging
 import uuid
@@ -10,9 +9,8 @@ from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import or_
 from extensions import db, login_manager
 from forms import LoginForm, ProductForm, RegistrationForm, ProfileEditForm, ChangePasswordForm
-from models import Category, Product, User, ProductImage
+from models import Category, Product, User, ProductImage, Order, OrderItem
 
-# Разрешённые расширения файлов (дублируем из app.py, чтобы избежать циклического импорта)
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 def allowed_file(filename):
@@ -32,48 +30,30 @@ def _admin_only():
     if not current_user.is_authenticated or not current_user.is_admin:
         abort(403)
 
-
 def _save_file(file) -> str | None:
-    """Сохраняет файл и возвращает URL. Если файл не передан или невалиден — None."""
     if not file or file.filename == '':
         return None
     if not allowed_file(file.filename):
         return None
-
     original_filename = secure_filename(file.filename)
-    # Извлекаем расширение файла
     if '.' in original_filename:
         ext = original_filename.rsplit('.', 1)[1].lower()
         unique_filename = f"{uuid.uuid4().hex}.{ext}"
     else:
         unique_filename = uuid.uuid4().hex
-
     file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename))
     return url_for('static', filename=f'uploads/{unique_filename}')
-
-def _product_query():
-    q = Product.query
-    cat = (request.args.get("category") or "").strip()
-    search = (request.args.get("search") or "").strip()
-    if cat and cat != "all":
-        q = q.join(Category).filter(Category.slug == cat)
-    if search:
-        like = f"%{search}%"
-        q = q.filter(or_(Product.name.ilike(like), Product.description.ilike(like)))
-    return q.order_by(Product.id.desc())
 
 def _flash_errors(form):
     for field, errors in form.errors.items():
         for err in errors:
             flash(f"{getattr(form, field).label.text or field}: {err}", "error")
 
-# ------------------ Маршруты ------------------
 @bp.route("/")
 def index():
     categories = Category.query.order_by(Category.name).all()
     cat_slug = (request.args.get("category") or "").strip()
     search = (request.args.get("search") or "").strip()
-
     if cat_slug == "favorites":
         if current_user.is_authenticated:
             products = current_user.favorite_products.all()
@@ -81,8 +61,7 @@ def index():
             products = []
             flash("Войдите, чтобы просмотреть избранное", "info")
         if search:
-            products = [p for p in products if
-                        search.lower() in p.name.lower() or search.lower() in p.description.lower()]
+            products = [p for p in products if search.lower() in p.name.lower() or search.lower() in p.description.lower()]
     else:
         query = Product.query
         if cat_slug and cat_slug != "all":
@@ -91,12 +70,9 @@ def index():
             like = f"%{search}%"
             query = query.filter(or_(Product.name.ilike(like), Product.description.ilike(like)))
         products = query.order_by(Product.id.desc()).all()
-
-    # Список ID избранных товаров для текущего пользователя
     favorites_ids = []
     if current_user.is_authenticated:
         favorites_ids = [p.id for p in current_user.favorite_products.all()]
-
     return render_template("index.html", categories=categories, products=products, favorites_ids=favorites_ids)
 
 @bp.route("/auth/login", methods=["GET", "POST"])
@@ -121,10 +97,9 @@ def register():
         return redirect(url_for("main.index"))
     form = RegistrationForm()
     if form.validate_on_submit():
-        username = form.name.data.strip().lower() + "_" + form.surname.data.strip().lower()
+        username = form.login.data.strip().lower()
         u = User(username=username, email=form.email.data.strip(),
-                 surname=form.surname.data.strip(), name=form.name.data.strip(),
-                 patronymic=form.patronymic.data.strip() or "")
+                 surname=form.surname.data.strip(), name=form.name.data.strip(), patronymic=None)
         u.set_password(form.password.data)
         db.session.add(u)
         db.session.commit()
@@ -145,12 +120,13 @@ def logout():
 @login_required
 def profile():
     edit_form = ProfileEditForm(obj=current_user)
+    edit_form.login.data = current_user.username
     password_form = ChangePasswordForm()
-
+    
     if edit_form.validate_on_submit():
         current_user.surname = edit_form.surname.data.strip()
         current_user.name = edit_form.name.data.strip()
-        current_user.patronymic = edit_form.patronymic.data.strip() or ""
+        current_user.username = edit_form.login.data.strip().lower()
         current_user.email = edit_form.email.data.strip()
         db.session.commit()
         flash("Данные обновлены.", "success")
@@ -165,11 +141,35 @@ def profile():
         else:
             flash("Неверный текущий пароль.", "error")
 
-    return render_template("profile.html", edit_form=edit_form, password_form=password_form)
+    page = request.args.get('page', 1, type=int)
+    pagination = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).paginate(page=page, per_page=10)
+    orders = pagination.items
+    
+    return render_template("profile.html", edit_form=edit_form, password_form=password_form, orders=orders, pagination=pagination)
 
 @bp.route("/basket")
 def basket():
     return render_template("basket.html")
+
+@bp.route("/api/checkout", methods=["POST"])
+@login_required
+def checkout():
+    data = request.get_json()
+    if not data or 'items' not in data or not data['items']:
+        return jsonify({"error": "Корзина пуста"}), 400
+    items = data['items']
+    total = 0
+    order = Order(user_id=current_user.id, total_price=0)
+    db.session.add(order)
+    db.session.flush()
+    for item in items:
+        qty = int(item.get('quantity', 1))
+        price = float(item.get('price_value', 0))
+        total += qty * price
+        db.session.add(OrderItem(order_id=order.id, product_name=item.get('title', 'Товар'), quantity=qty, price=price))
+    order.total_price = total
+    db.session.commit()
+    return jsonify({"success": True, "order_id": order.id}), 200
 
 @bp.route("/admin")
 @login_required
@@ -185,24 +185,15 @@ def add_product():
     if form.validate_on_submit():
         main_file = request.files.get('main_image')
         main_url = _save_file(main_file) if main_file else None
-
-        product = Product(
-            name=form.name.data.strip(),
-            description=form.description.data.strip(),
-            price=float(form.price.data),
-            image_url=main_url,
-            category_id=form.category.data
-        )
+        product = Product(name=form.name.data.strip(), description=form.description.data.strip(), price=float(form.price.data), image_url=main_url, category_id=form.category.data)
         db.session.add(product)
         db.session.flush()
-
         extra_files = request.files.getlist('extra_images')
         for idx, file in enumerate(extra_files):
             url = _save_file(file)
             if url:
                 img = ProductImage(product_id=product.id, url=url, order=idx)
                 db.session.add(img)
-
         db.session.commit()
         flash("Товар добавлен.", "success")
         return redirect(url_for("main.admin"))
@@ -219,13 +210,11 @@ def edit_product(product_id: int):
         abort(404)
     form = ProductForm(obj=product)
     form.category.data = product.category_id
-
     if form.validate_on_submit():
         product.name = form.name.data.strip()
         product.description = form.description.data.strip()
         product.price = float(form.price.data)
         product.category_id = form.category.data
-
         main_file = request.files.get('main_image')
         if main_file and main_file.filename != '':
             if product.image_url:
@@ -237,7 +226,6 @@ def edit_product(product_id: int):
             new_url = _save_file(main_file)
             if new_url:
                 product.image_url = new_url
-
         extra_files = request.files.getlist('extra_images')
         max_order = db.session.query(db.func.max(ProductImage.order)).filter_by(product_id=product.id).scalar() or -1
         for file in extra_files:
@@ -246,7 +234,6 @@ def edit_product(product_id: int):
                 max_order += 1
                 img = ProductImage(product_id=product.id, url=url, order=max_order)
                 db.session.add(img)
-
         delete_ids = request.form.getlist('delete_extra_ids')
         for img_id in delete_ids:
             img = ProductImage.query.get(int(img_id))
@@ -257,13 +244,11 @@ def edit_product(product_id: int):
                     if os.path.exists(full_path):
                         os.remove(full_path)
                 db.session.delete(img)
-
         db.session.commit()
         flash("Товар обновлён.", "success")
         return redirect(url_for("main.admin"))
     elif request.method == "POST":
         _flash_errors(form)
-
     return render_template("admin_form.html", form=form, title="Редактировать товар", product=product)
 
 @bp.route("/admin/delete/<int:product_id>", methods=["POST"])
@@ -273,14 +258,12 @@ def delete_product(product_id: int):
     product = db.session.get(Product, product_id)
     if not product:
         abort(404)
-
     if product.image_url:
         old_path = product.image_url.replace(url_for('static', filename=''), '')
         if old_path.startswith('uploads/'):
             full_old = os.path.join(current_app.config['UPLOAD_FOLDER'], old_path[8:])
             if os.path.exists(full_old):
                 os.remove(full_old)
-
     for img in product.extra_images.all():
         file_path = img.url.replace(url_for('static', filename=''), '')
         if file_path.startswith('uploads/'):
@@ -288,7 +271,6 @@ def delete_product(product_id: int):
             if os.path.exists(full_path):
                 os.remove(full_path)
         db.session.delete(img)
-
     db.session.delete(product)
     db.session.commit()
     flash("Товар удалён.", "warning")
@@ -296,7 +278,7 @@ def delete_product(product_id: int):
 
 @bp.route("/api/products", methods=["GET"])
 def api_products():
-    return jsonify([p.to_dict() for p in _product_query().all()]), 200
+    return jsonify([p.to_dict() for p in Product.query.order_by(Product.id.desc()).all()]), 200
 
 @bp.route("/product/<int:product_id>")
 def product_detail(product_id):
@@ -308,11 +290,9 @@ def product_detail(product_id):
     all_images.extend(extra_urls)
     if current_user.is_authenticated:
         favorites_ids = [p.id for p in current_user.favorite_products.all()]
-
-    return render_template('product_page.html',
-                           product=product,
-                           all_images=all_images,
-                           favorites_ids=favorites_ids)
+    else:
+        favorites_ids = []
+    return render_template('product_page.html', product=product, all_images=all_images, favorites_ids=favorites_ids)
 
 @bp.route("/favorites/toggle/<int:product_id>", methods=["POST"])
 @login_required

@@ -13,12 +13,15 @@ class LoginForm(FlaskForm):
 class RegistrationForm(FlaskForm):
     surname = StringField("Фамилия", validators=[DataRequired(), Length(min=2, max=80)])
     name = StringField("Имя", validators=[DataRequired(), Length(min=2, max=80)])
-    patronymic = StringField("Отчество", validators=[Length(max=80)])
+    login = StringField("Логин", validators=[DataRequired(), Length(min=3, max=80)])
     email = EmailField("E-mail", validators=[DataRequired(), Email(), Length(max=120)])
     password = PasswordField("Пароль", validators=[DataRequired(), Length(min=6, max=128)])
     password_confirm = PasswordField("Повтор пароля", validators=[DataRequired(), EqualTo('password', message='Пароли не совпадают')])
     submit = SubmitField("Зарегистрироваться")
 
+    def validate_login(self, field):
+        if User.query.filter_by(username=field.data.strip().lower()).first():
+            raise ValidationError("Такой логин уже занят.")
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError("Такой email уже зарегистрирован.")
@@ -39,7 +42,7 @@ class ProductForm(FlaskForm):
 class ProfileEditForm(FlaskForm):
     surname = StringField("Фамилия", validators=[DataRequired(), Length(min=2, max=80)])
     name = StringField("Имя", validators=[DataRequired(), Length(min=2, max=80)])
-    patronymic = StringField("Отчество", validators=[Length(max=80)])
+    login = StringField("Логин", validators=[DataRequired(), Length(min=3, max=80)])
     email = EmailField("E-mail", validators=[DataRequired(), Email(), Length(max=120)])
     submit = SubmitField("Сохранить")
 
@@ -48,3 +51,4 @@ class ChangePasswordForm(FlaskForm):
     new_password = PasswordField("Новый пароль", validators=[DataRequired(), Length(min=6, max=128)])
     new_password_confirm = PasswordField("Подтвердите новый пароль", validators=[DataRequired(), EqualTo('new_password', message='Пароли не совпадают')])
     submit = SubmitField("Изменить пароль")
+    
