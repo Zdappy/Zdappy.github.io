@@ -4,6 +4,10 @@ from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
 
+favorites = db.Table('favorites',
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+    db.Column('product_id', db.Integer, db.ForeignKey('products.id', ondelete='CASCADE'), primary_key=True)
+)
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -22,6 +26,12 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
+
+    favorite_products = db.relationship(
+        'Product',
+        secondary=favorites,
+        backref=db.backref('favorited_by', lazy='dynamic'),
+        lazy='dynamic')
 
 class Category(db.Model):
     __tablename__ = "categories"

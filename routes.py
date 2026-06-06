@@ -71,8 +71,33 @@ def _flash_errors(form):
 @bp.route("/")
 def index():
     categories = Category.query.order_by(Category.name).all()
-    products = _product_query().all()
-    return render_template("index.html", categories=categories, products=products)
+    cat_slug = (request.args.get("category") or "").strip()
+    search = (request.args.get("search") or "").strip()
+
+    if cat_slug == "favorites":
+        if current_user.is_authenticated:
+            products = current_user.favorite_products.all()
+        else:
+            products = []
+            flash("Войдите, чтобы просмотреть избранное", "info")
+        if search:
+            products = [p for p in products if
+                        search.lower() in p.name.lower() or search.lower() in p.description.lower()]
+    else:
+        query = Product.query
+        if cat_slug and cat_slug != "all":
+            query = query.join(Category).filter(Category.slug == cat_slug)
+        if search:
+            like = f"%{search}%"
+            query = query.filter(or_(Product.name.ilike(like), Product.description.ilike(like)))
+        products = query.order_by(Product.id.desc()).all()
+
+    # Список ID избранных товаров для текущего пользователя
+    favorites_ids = []
+    if current_user.is_authenticated:
+        favorites_ids = [p.id for p in current_user.favorite_products.all()]
+
+    return render_template("index.html", categories=categories, products=products, favorites_ids=favorites_ids)
 
 @bp.route("/auth/login", methods=["GET", "POST"])
 def login():
@@ -281,7 +306,35 @@ def product_detail(product_id):
     if product.image_url:
         all_images.append(product.image_url)
     all_images.extend(extra_urls)
-    return render_template('product_page.html', product=product, all_images=all_images)
+    if current_user.is_authenticated:
+        favorites_ids = [p.id for p in current_user.favorite_products.all()]
+
+    return render_template('product_page.html',
+                           product=product,
+                           all_images=all_images,
+                           favorites_ids=favorites_ids)
+
+@bp.route("/favorites/toggle/<int:product_id>", methods=["POST"])
+@login_required
+def toggle_favorite(product_id: int):
+    product = Product.query.get_or_404(product_id)
+    if product in current_user.favorite_products:
+        current_user.favorite_products.remove(product)
+        flash("Товар удалён из избранного", "warning")
+    else:
+        current_user.favorite_products.append(product)
+        flash("Товар добавлен в избранное", "success")
+    db.session.commit()
+    return redirect(request.referrer or url_for("main.index"))
+
+@bp.route("/favorites/remove/<int:product_id>", methods=["POST"])
+@login_required
+def remove_favorite(product_id: int):
+    product = Product.query.get_or_404(product_id)
+    if product in current_user.favorite_products:
+        current_user.favorite_products.remove(product)
+        db.session.commit()
+    return redirect(request.referrer or url_for("main.index"))
 
 @bp.app_errorhandler(403)
 def forbidden(e):

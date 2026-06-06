@@ -13,30 +13,58 @@
             {% for cat in categories %}
                 <option value="{{ cat.slug }}" {% if request.args.get('category')==cat.slug %}selected{% endif %}>{{ cat.name }}</option>
             {% endfor %}
+            <option value="favorites" {% if request.args.get('category')=='favorites' %}selected{% endif %}>❤️ Избранное</option>
         </select>
         <button type="submit" class="search-btn" style="background:var(--brand);color:#fff;">Найти</button>
     </form>
 
-    <div class="products-grid">
-        {% for p in products %}
-        <div class="product-card">
-             <a href="{{ url_for('.product_detail', product_id=p.id) }}" class="product-card-link" > 
-                <img src="{{ p.image_src }}" alt="{{ p.name }}" loading="lazy">
-                <div class="product-body">
-                    <span class="badge">{{ p.category.name }}</span>
-                    <h3>{{ p.name }}</h3>
-                    <p class="product-description">{{ p.description[:100] }}{% if p.description|length > 100 %}...{% endif %}</p>
-                    <p class="price">{{ "%.0f"|format(p.price) }} ₽</p>
-                </div>
-            </a>
-           <button class="add-to-cart" data-id="{{ p.id }}" data-title="{{ p.name }}" data-price="{{ p.price }}" data-image="{{ p.image_src }}">В корзину</button>
+    <div class="products-grid">  <!-- ← ЭТОТ КОНТЕЙНЕР БЫЛ ОТСУТСТВУЕТ -->
+{% for p in products %}
+<div class="product-card">
+    <!-- Изображение - ссылка на товар -->
+    <a href="{{ url_for('.product_detail', product_id=p.id) }}" class="product-card-link">
+        <img src="{{ p.image_src }}" alt="{{ p.name }}" loading="lazy">
+    </a>
+
+    <div class="product-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="badge">{{ p.category.name }}</span>
+            {% if current_user.is_authenticated %}
+                <form method="POST" action="{{ url_for('main.toggle_favorite', product_id=p.id) }}" class="favorite-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="favorite-btn {% if p.id in favorites_ids %}active{% endif %}" aria-label="Избранное">
+                        {% if p.id in favorites_ids %}❤️{% else %}🤍{% endif %}
+                    </button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('main.login') }}" class="favorite-btn" style="text-decoration: none;">🤍</a>
+            {% endif %}
         </div>
-        {% else %}
-        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);">
-            <p>Товары не найдены.</p>
-            <a href="{{ url_for('main.index') }}" class="back-btn" style="display:inline-block;margin-top:10px;">Сбросить фильтры</a>
-        </div>
-        {% endfor %}
+        <a href="{{ url_for('.product_detail', product_id=p.id) }}" style="text-decoration: none; color: inherit;">
+            <h3>{{ p.name }}</h3>
+            <p class="product-description">{{ p.description[:100] }}{% if p.description|length > 100 %}...{% endif %}</p>
+            <p class="price">{{ "%.0f"|format(p.price) }} ₽</p>
+        </a>
     </div>
+
+    <button class="add-to-cart" data-id="{{ p.id }}" data-title="{{ p.name }}" data-price="{{ p.price }}" data-image="{{ p.image_src }}">В корзину</button>
 </div>
+{% else %}
+    <p>Товары не найдены</p>
+{% endfor %}
+    </div>  <!-- Закрываем products-grid -->
+</div>
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Предотвращаем переход по ссылке при клике на кнопку избранного
+    const favoriteForms = document.querySelectorAll('.favorite-form');
+    favoriteForms.forEach(form => {
+        form.addEventListener('click', function(event) {
+            event.stopPropagation(); // Останавливаем всплытие к родительской ссылке
+        });
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}
