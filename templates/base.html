@@ -29,13 +29,13 @@
                     <a href="{{ url_for('main.admin') }}" class="top-link">Админка</a>
                 {% endif %}
                 
-                <a href="{{ url_for('main.profile') }}" class="top-link">{{ current_user.username }}</a>
+                <a href="{{ url_for('main.profile') }}" class="profile-btn">{{ current_user.username }}</a>
                 <a href="{{ url_for('main.logout') }}" class="top-link">Выйти</a>
             {% else %}
                 <a href="{{ url_for('main.login') }}" class="top-link">Войти</a>
             {% endif %}
             
-            <button id="themeToggle" class="switch-btn">🌙</button>
+            <button id="themeToggle" class="theme-toggle" type="button">🌙</button>
         </nav>
     </div>
 </header>

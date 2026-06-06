@@ -2,83 +2,45 @@
     const CART_KEY = "zdappy_cart";
     const THEME_KEY = "zdappy_theme";
 
-    function getCart() { try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { return []; } }
-    function saveCart(cart) { localStorage.setItem(CART_KEY, JSON.stringify(cart)); updateCartCount(); }
+    function getCart() {
+        try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { return []; }
+    }
+    function saveCart(cart) {
+        localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        updateCartCount();
+    }
     function formatPrice(v) { return `${Math.round(Number(v)||0)} ₽`; }
     function updateCartCount() {
         const el = document.getElementById("cartCount");
-        if(el) { const cart = getCart(); el.textContent = cart.reduce((s,i)=>s+(i.quantity||0),0); }
+        if(el) {
+            const cart = getCart();
+            el.textContent = cart.reduce((s,i)=>s+(i.quantity||0),0);
+        }
     }
     function applyTheme(theme) {
         const isDark = theme === "dark";
         document.body.classList.toggle("dark-theme", isDark);
         const btn = document.getElementById("themeToggle");
-        if(btn) btn.textContent = isDark ? "☀️" : "🌙";
+        if(btn) btn.textContent = isDark ? "️" : "🌙";
         localStorage.setItem(THEME_KEY, theme);
     }
 
-    // --- МОДАЛЬНОЕ ОКНО ---
-    const modal = document.getElementById("checkoutModal");
-    const modalList = document.getElementById("modalOrderList");
-    const modalTotal = document.getElementById("modalTotal");
-    const openBtn = document.getElementById("checkoutBtn");
-    const closeBtn = document.getElementById("modalClose");
-    const cancelBtn = document.getElementById("modalCancel");
-    const confirmBtn = document.getElementById("modalConfirm");
-
-    function openModal() {
-        const cart = getCart();
-        if (!cart.length) { alert("Корзина пуста!"); return; }
-        modalList.innerHTML = "";
-        let total = 0;
-        cart.forEach(item => {
-            total += (item.price_value||0) * item.quantity;
-            const li = document.createElement("li");
-            li.textContent = `${item.title} × ${item.quantity} — ${formatPrice(item.price_value * item.quantity)}`;
-            modalList.appendChild(li);
-        });
-        modalTotal.textContent = formatPrice(total);
-        modal.style.display = "flex";
+    function showNotification(message, type) {
+        const notif = document.getElementById("cartNotification");
+        if(!notif) return;
+        notif.textContent = message;
+        notif.className = `cart-notification cart-notification-${type}`;
+        notif.style.display = "block";
+        setTimeout(() => { notif.style.display = "none"; }, 3000);
     }
-    function closeModal() { modal.style.display = "none"; }
 
-    if(openBtn) openBtn.addEventListener("click", openModal);
-    if(closeBtn) closeBtn.addEventListener("click", closeModal);
-    if(cancelBtn) cancelBtn.addEventListener("click", closeModal);
-    modal?.addEventListener("click", (e) => { if(e.target === modal) closeModal(); });
-
-    // --- ОТПРАВКА ЗАКАЗА ---
-    if(confirmBtn) confirmBtn.addEventListener("click", async () => {
-        confirmBtn.disabled = true;
-        confirmBtn.textContent = "Обработка...";
-        try {
-            const res = await fetch("/api/checkout", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content },
-                body: JSON.stringify({ items: getCart() })
-            });
-            const data = await res.json();
-            if(data.success) {
-                localStorage.removeItem(CART_KEY);
-                updateCartCount();
-                closeModal();
-                alert("✅ Заказ успешно оформлен! История появилась в личном кабинете.");
-                location.reload();
-            } else {
-                alert("Ошибка: " + (data.error || "Не удалось оформить заказ"));
-            }
-        } catch (err) {
-            alert("Ошибка сети. Попробуйте позже.");
-        } finally {
-            confirmBtn.disabled = false;
-            confirmBtn.textContent = "Подтвердить";
-        }
-    });
+    let isProcessing = false;
 
     document.addEventListener("DOMContentLoaded", () => {
         applyTheme(localStorage.getItem(THEME_KEY) || "light");
         document.getElementById("themeToggle")?.addEventListener("click", () => {
-            applyTheme(!document.body.classList.contains("dark-theme") ? "dark" : "light");
+            const isDark = !document.body.classList.contains("dark-theme");
+            applyTheme(isDark ? "dark" : "light");
         });
 
         document.addEventListener("click", (e) => {
@@ -90,7 +52,7 @@
             if(existing) existing.quantity++;
             else cart.push({id, title: btn.dataset.title, price_value: parseFloat(btn.dataset.price), quantity: 1, image: btn.dataset.image});
             saveCart(cart);
-            btn.textContent = "✅ "; setTimeout(()=>btn.textContent="В корзину", 800);
+            btn.textContent = "✅"; setTimeout(()=>btn.textContent="В корзину", 800);
         });
 
         const container = document.getElementById("cartItems");
@@ -133,6 +95,86 @@
                     location.reload();
                 });
             }
+        }
+
+        const modal = document.getElementById("checkoutModal");
+        const modalList = document.getElementById("modalOrderList");
+        const modalTotal = document.getElementById("modalTotal");
+        const checkoutBtn = document.getElementById("checkoutBtn");
+        const closeBtn = document.getElementById("modalClose");
+        const cancelBtn = document.getElementById("modalCancel");
+        const confirmBtn = document.getElementById("modalConfirm");
+
+        function openModal() {
+            const cart = getCart();
+            if (!cart.length) {
+                showNotification("Корзина пуста!", "error");
+                return;
+            }
+            modalList.innerHTML = "";
+            let total = 0;
+            cart.forEach(item => {
+                total += (item.price_value||0) * item.quantity;
+                const li = document.createElement("li");
+                li.textContent = `${item.title} × ${item.quantity} — ${formatPrice(item.price_value * item.quantity)}`;
+                modalList.appendChild(li);
+            });
+            modalTotal.textContent = formatPrice(total);
+            modal.style.display = "flex";
+        }
+        function closeModal() { if(modal) modal.style.display = "none"; }
+
+        if(checkoutBtn) {
+            checkoutBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                const cart = getCart();
+                if (!cart.length) {
+                    showNotification("Корзина пуста!", "error");
+                } else {
+                    openModal();
+                }
+            });
+        }
+
+        if(closeBtn) closeBtn.addEventListener("click", closeModal);
+        if(cancelBtn) cancelBtn.addEventListener("click", closeModal);
+        if(modal) modal.addEventListener("click", (e) => { if(e.target === modal) closeModal(); });
+
+        if(confirmBtn) {
+            confirmBtn.addEventListener("click", async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isProcessing) return;
+                isProcessing = true;
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = "Обработка...";
+                try {
+                    const res = await fetch("/api/checkout", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')?.content || ""
+                        },
+                        body: JSON.stringify({ items: getCart() })
+                    });
+                    const data = await res.json();
+                    if(data.success) {
+                        localStorage.removeItem(CART_KEY);
+                        updateCartCount();
+                        closeModal();
+                        showNotification("Заказ успешно оформлен!", "success");
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showNotification(data.error || "Не удалось оформить заказ", "error");
+                    }
+                } catch (err) {
+                    showNotification("Ошибка сети. Попробуйте позже.", "error");
+                } finally {
+                    isProcessing = false;
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = "Подтвердить";
+                }
+            });
         }
     });
 })();

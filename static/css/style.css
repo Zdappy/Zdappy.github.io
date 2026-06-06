@@ -57,21 +57,25 @@ width: 52px; height: 52px; border-radius: 16px; object-fit: cover; background: v
 .logo-text { min-width: 0; }
 .title { font-size: 24px; font-weight: 800; line-height: 1.1; }
 .top-nav { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-.top-link, .switch-btn {
-border: 1px solid var(--border);
-background: var(--surface);
-color: var(--text);
-padding: 11px 15px;
-border-radius: 999px;
-display: inline-flex;
-align-items: center;
-justify-content: center;
-min-height: 42px;
-cursor: pointer;
+.top-link {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 12px 20px;
+    border-radius: 999px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
-.top-link:hover, .switch-btn:hover { border-color: var(--brand); color: var(--brand); }
 
-/* Catalog */
+.top-link:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+    background: var(--surface-soft);
+}
+
 .section-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 14px; }
 .section-head h2 { margin: 0; font-size: 28px; }
 .catalog-section { margin-top: 8px; }
@@ -367,6 +371,167 @@ color: var(--text);
 .modal-total { font-size: 18px; font-weight: 700; margin: 12px 0; text-align: right; }
 .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
 .modal-actions button { flex: 1; }
+.orders-history { display: grid; gap: 14px; margin-top: 16px; }
+.order-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+.order-header { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 8px; }
+.order-date { font-weight: 400; color: var(--muted); font-size: 13px; }
+.order-items-list { list-style: none; padding: 0; margin: 0 0 10px; font-size: 14px; color: var(--muted); }
+.order-items-list li { padding: 4px 0; }
+.order-total { text-align: right; font-size: 16px; border-top: 1px solid var(--border); padding-top: 8px; }
+.empty-state { text-align: center; color: var(--muted); padding: 20px 0; }
+
+/* Bulk upload */
+.bulk-info {
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+.bulk-info p { margin: 4px 0; }
+.drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 20px;
+    padding: 50px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--surface);
+}
+.drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--brand);
+    background: var(--surface-soft);
+    transform: scale(1.01);
+}
+.drop-zone-icon { font-size: 48px; margin-bottom: 10px; }
+.drop-zone h3 { margin: 10px 0 5px; }
+.drop-zone p { color: var(--muted); margin: 0; }
+#previewTable td[contenteditable="true"] {
+    background: var(--surface-soft);
+    padding: 8px;
+    border-radius: 6px;
+    min-width: 100px;
+}
+#previewTable td[contenteditable="true"]:focus {
+    outline: 2px solid var(--brand);
+    background: var(--surface);
+}
+.theme-toggle, .profile-btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 11px 15px;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.theme-toggle:hover, .profile-btn:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+}
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+}
+.modal-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 24px; width: 90%; max-width: 420px;
+    position: relative; box-shadow: var(--shadow);
+}
+.modal-close {
+    position: absolute; top: 12px; right: 14px; background: none; border: none;
+    font-size: 24px; cursor: pointer; color: var(--muted); padding: 4px;
+}
+.modal-close:hover { color: var(--text); }
+.modal-list { margin: 16px 0; max-height: 200px; overflow-y: auto; list-style: none; padding: 0; }
+.modal-list li { padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
+.modal-total { font-size: 18px; font-weight: 700; margin: 12px 0; text-align: right; }
+.modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+.modal-actions button, .modal-actions a { flex: 1; text-align: center; text-decoration: none; }
+.modal-actions button {
+    flex: 1;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 50px;
+}
+.cart-notification {
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    margin-bottom: 18px;
+    font-weight: 500;
+    text-align: center;
+}
+.cart-notification-error {
+    border-color: color-mix(in srgb, var(--error) 35%, var(--border));
+    color: var(--error);
+}
+.cart-notification-success {
+    border-color: color-mix(in srgb, var(--success) 35%, var(--border));
+    color: var(--success);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+.modal-actions button {
+    flex: 1;
+    min-height: 48px;
+    font-size: 16px;
+    font-weight: 600;
+}
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.modal-actions button {
+    flex: 1;
+    min-width: 140px;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.modal-actions .save-btn {
+    background: var(--brand);
+    color: #fff;
+    border: none;
+}
+
+.modal-actions .back-btn {
+    background: var(--surface-soft);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.modal-actions .save-btn:hover {
+    background: var(--brand-dark);
+}
+
+.modal-actions .back-btn:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+}
 .orders-history { display: grid; gap: 14px; margin-top: 16px; }
 .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
 .order-header { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 8px; }

@@ -34,7 +34,7 @@
     </div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
-        <div>Логин: <strong>{{ current_user.username or 'Не указан' }}</strong></div>
+    <div>Логин: <strong>{{ current_user.username or 'Не указан' }}</strong></div>
         <a href="#" onclick="document.getElementById('edit-login').style.display='block';this.parentElement.style.display='none';return false;" style="color:var(--brand);font-size:14px;">[ Редактировать ]</a>
     </div>
     <div id="edit-login" style="display:none;padding:10px 0;border-bottom:1px solid var(--border);">
@@ -42,7 +42,7 @@
             {{ edit_form.hidden_tag() }}
             {{ edit_form.login(class="form-control", style="flex:1;") }}
             {{ edit_form.submit(class="save-btn", style="width:auto;padding:8px 16px;") }}
-            <a href="#" onclick="this.parentElement.parentElement.style.display='none';this.parentElement.parentElement.previousElementSibling.style.display='flex';return false;" style="color:var(--muted);font-size:14px;">Отмена</a>
+        <a href="#" onclick="this.parentElement.parentElement.style.display='none';this.parentElement.parentElement.previousElementSibling.style.display='flex';return false;" style="color:var(--muted);font-size:14px;">Отмена</a>
         </form>
     </div>
 
@@ -83,7 +83,7 @@
             {% for order in orders %}
             <div class="order-card">
                 <div class="order-header">
-                    <span>📦 Заказ #{{ order.id }}</span>
+                    <span>📦 Заказ #{{ order.user_order_number }}</span>
                     <span class="order-date">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
                 </div>
                 <ul class="order-items-list">
@@ -95,23 +95,6 @@
             </div>
             {% endfor %}
         </div>
-
-        {% if pagination.pages > 1 %}
-        <div style="display:flex; gap:15px; justify-content:center; align-items:center; margin-top:25px;">
-            {% if pagination.has_prev %}
-                <a href="?page={{ pagination.prev_num }}" class="back-btn">← Предыдущие</a>
-            {% endif %}
-            
-            <span style="color:var(--muted); font-size:14px;">
-                Страница {{ pagination.page }} из {{ pagination.pages }}
-            </span>
-            
-            {% if pagination.has_next %}
-                <a href="?page={{ pagination.next_num }}" class="back-btn">Следующие →</a>
-            {% endif %}
-        </div>
-        {% endif %}
-
     {% else %}
         <p class="empty-state" style="text-align:center;color:var(--muted);padding:20px 0;">Заказов пока нет</p>
     {% endif %}

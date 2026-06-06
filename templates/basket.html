@@ -1,14 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Корзина{% endblock %}
+
 {% block content %}
-<div class="cart-container">
-    <h2>Корзина</h2>
+<div class="cart-container" style="max-width:900px;margin:0 auto;">
+    <h2 style="text-align:center;color:var(--brand);margin-bottom:30px;">Корзина</h2>
+    
+    <div id="cartNotification" class="cart-notification" style="display:none;"></div>
+    
     <div id="cartItems" class="cart-items"></div>
     <div class="cart-summary">
-        <h3 id="totalPrice">Итого: 0 ₽</h3>
+        <div id="totalPrice" style="font-size:20px;font-weight:700;">Итого: 0 ₽</div>
         <button id="checkoutBtn" class="buy-btn">Оформить заказ</button>
     </div>
 </div>
+
 <div id="checkoutModal" class="modal-overlay" style="display:none;">
     <div class="modal-box">
         <button class="modal-close" id="modalClose">&times;</button>
@@ -21,4 +26,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/Java.js') }}"></script>
 {% endblock %}

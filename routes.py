@@ -44,6 +44,17 @@ def _save_file(file) -> str | None:
     file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename))
     return url_for('static', filename=f'uploads/{unique_filename}')
 
+def product_query():
+    q = Product.query
+    cat = (request.args.get("category") or "").strip()
+    search = (request.args.get("search") or "").strip()
+    if cat and cat != "all":
+        q = q.join(Category).filter(Category.slug == cat)
+    if search:
+        like = f"%{search}%"
+        q = q.filter(or_(Product.name.ilike(like), Product.description.ilike(like)))
+    return q.order_by(Product.id.desc())
+
 def _flash_errors(form):
     for field, errors in form.errors.items():
         for err in errors:
@@ -122,7 +133,7 @@ def profile():
     edit_form = ProfileEditForm(obj=current_user)
     edit_form.login.data = current_user.username
     password_form = ChangePasswordForm()
-    
+
     if edit_form.validate_on_submit():
         current_user.surname = edit_form.surname.data.strip()
         current_user.name = edit_form.name.data.strip()
@@ -141,11 +152,8 @@ def profile():
         else:
             flash("Неверный текущий пароль.", "error")
 
-    page = request.args.get('page', 1, type=int)
-    pagination = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).paginate(page=page, per_page=10)
-    orders = pagination.items
-    
-    return render_template("profile.html", edit_form=edit_form, password_form=password_form, orders=orders, pagination=pagination)
+    orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
+    return render_template("profile.html", edit_form=edit_form, password_form=password_form, orders=orders)
 
 @bp.route("/basket")
 def basket():
@@ -159,7 +167,9 @@ def checkout():
         return jsonify({"error": "Корзина пуста"}), 400
     items = data['items']
     total = 0
-    order = Order(user_id=current_user.id, total_price=0)
+    last_order = Order.query.filter_by(user_id=current_user.id).order_by(Order.user_order_number.desc()).first()
+    next_number = (last_order.user_order_number + 1) if last_order else 1
+    order = Order(user_id=current_user.id, total_price=0, user_order_number=next_number)
     db.session.add(order)
     db.session.flush()
     for item in items:
@@ -169,7 +179,7 @@ def checkout():
         db.session.add(OrderItem(order_id=order.id, product_name=item.get('title', 'Товар'), quantity=qty, price=price))
     order.total_price = total
     db.session.commit()
-    return jsonify({"success": True, "order_id": order.id}), 200
+    return jsonify({"success": True, "order_id": order.id, "order_number": next_number}), 200
 
 @bp.route("/admin")
 @login_required
@@ -276,9 +286,63 @@ def delete_product(product_id: int):
     flash("Товар удалён.", "warning")
     return redirect(url_for("main.admin"))
 
+@bp.route("/admin/bulk-upload", methods=["GET"])
+@login_required
+def bulk_upload():
+    _admin_only()
+    return render_template("bulk_upload.html")
+
+@bp.route("/admin/bulk-upload", methods=["POST"])
+@login_required
+def bulk_upload_process():
+    _admin_only()
+    data = request.get_json()
+    if not data or 'products' not in data:
+        return jsonify({"error": "Нет данных"}), 400
+    products_data = data['products']
+    created = 0
+    errors = []
+    categories = {c.slug: c.id for c in Category.query.all()}
+    for idx, p in enumerate(products_data):
+        try:
+            name = p.get('name', '').strip()
+            description = p.get('description', '').strip()
+            price = float(p.get('price', 0))
+            category_slug = p.get('category_slug', '').strip()
+            image_urls_str = p.get('image_urls', '').strip()
+            if not name or not description or price <= 0 or category_slug not in categories:
+                errors.append(f"Строка {idx + 1}: некорректные данные")
+                continue
+            main_image = None
+            extra_images = []
+            if image_urls_str:
+                images_list = [img.strip() for img in image_urls_str.split(';') if img.strip()]
+                if images_list:
+                    img_path = images_list[0]
+                    if not img_path.startswith('/'):
+                        main_image = f"/static/{img_path.lstrip('/')}"
+                    else:
+                        main_image = img_path
+                    for extra_path in images_list[1:]:
+                        if not extra_path.startswith('/'):
+                            extra_images.append(f"/static/{extra_path.lstrip('/')}")
+                        else:
+                            extra_images.append(extra_path)
+            product = Product(name=name, description=description, price=price, category_id=categories[category_slug], image_url=main_image)
+            db.session.add(product)
+            db.session.flush()
+            for idx_extra, img_url in enumerate(extra_images):
+                img = ProductImage(product_id=product.id, url=img_url, order=idx_extra)
+                db.session.add(img)
+            created += 1
+        except Exception as e:
+            errors.append(f"Строка {idx + 1}: {str(e)}")
+    db.session.commit()
+    return jsonify({"success": True, "created": created, "errors": errors}), 200
+
 @bp.route("/api/products", methods=["GET"])
 def api_products():
-    return jsonify([p.to_dict() for p in Product.query.order_by(Product.id.desc()).all()]), 200
+    return jsonify([p.to_dict() for p in product_query().all()]), 200
 
 @bp.route("/product/<int:product_id>")
 def product_detail(product_id):

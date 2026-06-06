@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Пакетная загрузка товаров{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width:1100px;margin:0 auto;">
+    <div class="admin-head">
+        <h1>Пакетная загрузка товаров</h1>
+        <a href="{{ url_for('main.admin') }}" class="back-btn">Вернуться в админку</a>
+    </div>
+
+    <div id="dropZone" class="drop-zone">
+        <div class="drop-zone-content">
+            <div class="drop-zone-icon"></div>
+            <h3>Перетащите файл сюда</h3>
+            <p>или нажмите для выбора файла</p>
+            <input type="file" id="fileInput" accept=".csv,.tsv,.txt" style="display:none;">
+        </div>
+    </div>
+
+    <div id="previewSection" style="display:none;">
+        <h3 style="margin-top:30px;">Предварительный просмотр <span id="itemsCount" style="color:var(--muted);font-weight:400;font-size:16px;"></span></h3>
+        <div class="table-wrap">
+            <table class="admin-table" id="previewTable">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Описание</th>
+                        <th>Цена</th>
+                        <th>Категория</th>
+                        <th>Изображения</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="previewBody"></tbody>
+            </table>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end;">
+            <button id="clearBtn" class="back-btn">Очистить</button>
+            <button id="uploadBtn" class="buy-btn">Загрузить товары</button>
+        </div>
+    </div>
+
+    <div id="resultSection" style="display:none;margin-top:20px;"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="{{ url_for('static', filename='js/bulk_upload.js') }}"></script>
+{% endblock %}
