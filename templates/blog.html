@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="blog-container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
-    <a href="{{ url_for('main.index') }}" class="back-btn">
+<a href="javascript:history.back()" class="back-btn">
         ← Назад
     </a>
+<div class="blog-container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    
     <h1 style="margin-bottom: 30px; text-align: center;">Статьи и обзоры</h1>
 
     <div class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">

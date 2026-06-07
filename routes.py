@@ -288,6 +288,23 @@ def delete_product(product_id: int):
     flash("Товар удалён.", "warning")
     return redirect(url_for("main.admin"))
 
+@bp.route("/admin/edit_post/<int:post_id>", methods=["GET", "POST"])
+@login_required
+def edit_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if request.method == "POST":
+        post.title = request.form.get("title")
+        post.content = request.form.get("content")
+        post.image_post = request.form.get("image_post")
+        try:
+            db.session.commit()
+            flash("Статья успешно обновлена!", "success")
+            return redirect(url_for("main.admin"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Ошибка при обновлении: {e}", "danger")
+    return render_template("admin_post_form.html", post=post, title="Редактировать статью")
+
 @bp.route("/admin/delete_post/<int:post_id>", methods=["POST"])
 @login_required 
 def delete_post(post_id: int):
@@ -408,7 +425,11 @@ def product_detail(product_id):
         favorites_ids = [p.id for p in current_user.favorite_products.all()]
     else:
         favorites_ids = []
-    return render_template('product_page.html', product=product, all_images=all_images, favorites_ids=favorites_ids)
+    posts = Post.query.order_by(
+        (Post.product_id == product_id).desc(), # Сначала True (совпадающие), потом False
+        Post.date_posted.desc()                 # Внутри групп сортируем по свежести
+    ).limit(10).all()
+    return render_template('product_page.html', product=product, all_images=all_images, favorites_ids=favorites_ids, posts=posts)
 
 @bp.route("/favorites/toggle/<int:product_id>", methods=["POST"])
 @login_required

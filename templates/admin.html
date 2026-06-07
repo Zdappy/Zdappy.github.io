@@ -96,7 +96,9 @@
                     <td data-label="Дата публикации">{{ post.date_posted.strftime('%d.%m.%Y') }}</td>
                     <td data-label="Действия">
                         <div class="row-actions">
-                            <a href="#" class="top-link" style="padding:8px 12px; font-size:13px; margin-right: 5px;">Изменить</a>
+                            <a href="{{ url_for('main.edit_post', post_id=post.id) }}" class="top-link" style="padding:8px 12px; font-size:13px; margin-right: 5px;">
+                                Изменить
+                            </a>
                             
                             <form method="POST" action="{{ url_for('main.delete_post', post_id=post.id) }}" style="display:inline;" onsubmit="return confirm('Вы уверены, что хотите удалить эту статью?');">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
