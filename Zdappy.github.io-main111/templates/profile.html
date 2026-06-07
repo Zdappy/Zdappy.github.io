@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width:900px;margin:0 auto;">
+    <h2 style="text-align:center;color:var(--brand);margin-bottom:30px;">ВАШ ЛИЧНЫЙ КАБИНЕТ</h2>
+    
+    <h3>Данные пользователя</h3>
+    
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>Имя: <strong>{{ current_user.name or 'Не указано' }}</strong></div>
+        <a href="#" onclick="document.getElementById('edit-name').style.display='block';this.parentElement.style.display='none';return false;" style="color:var(--brand);font-size:14px;">[ Редактировать ]</a>
+    </div>
+    <div id="edit-name" style="display:none;padding:10px 0;border-bottom:1px solid var(--border);">
+        <form method="POST" style="display:flex;gap:10px;align-items:center;">
+            {{ edit_form.hidden_tag() }}
+            {{ edit_form.name(class="form-control", style="flex:1;") }}
+            {{ edit_form.submit(class="save-btn", style="width:auto;padding:8px 16px;") }}
+            <a href="#" onclick="this.parentElement.parentElement.style.display='none';this.parentElement.parentElement.previousElementSibling.style.display='flex';return false;" style="color:var(--muted);font-size:14px;">Отмена</a>
+        </form>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>Фамилия: <strong>{{ current_user.surname or 'Не указана' }}</strong></div>
+        <a href="#" onclick="document.getElementById('edit-surname').style.display='block';this.parentElement.style.display='none';return false;" style="color:var(--brand);font-size:14px;">[ Редактировать ]</a>
+    </div>
+    <div id="edit-surname" style="display:none;padding:10px 0;border-bottom:1px solid var(--border);">
+        <form method="POST" style="display:flex;gap:10px;align-items:center;">
+            {{ edit_form.hidden_tag() }}
+            {{ edit_form.surname(class="form-control", style="flex:1;") }}
+            {{ edit_form.submit(class="save-btn", style="width:auto;padding:8px 16px;") }}
+            <a href="#" onclick="this.parentElement.parentElement.style.display='none';this.parentElement.parentElement.previousElementSibling.style.display='flex';return false;" style="color:var(--muted);font-size:14px;">Отмена</a>
+        </form>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+    <div>Логин: <strong>{{ current_user.username or 'Не указан' }}</strong></div>
+        <a href="#" onclick="document.getElementById('edit-login').style.display='block';this.parentElement.style.display='none';return false;" style="color:var(--brand);font-size:14px;">[ Редактировать ]</a>
+    </div>
+    <div id="edit-login" style="display:none;padding:10px 0;border-bottom:1px solid var(--border);">
+        <form method="POST" style="display:flex;gap:10px;align-items:center;">
+            {{ edit_form.hidden_tag() }}
+            {{ edit_form.login(class="form-control", style="flex:1;") }}
+            {{ edit_form.submit(class="save-btn", style="width:auto;padding:8px 16px;") }}
+        <a href="#" onclick="this.parentElement.parentElement.style.display='none';this.parentElement.parentElement.previousElementSibling.style.display='flex';return false;" style="color:var(--muted);font-size:14px;">Отмена</a>
+        </form>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>E-Mail: <strong>{{ current_user.email }}</strong></div>
+        <a href="#" onclick="document.getElementById('edit-email').style.display='block';this.parentElement.style.display='none';return false;" style="color:var(--brand);font-size:14px;">[ Редактировать ]</a>
+    </div>
+    <div id="edit-email" style="display:none;padding:10px 0;border-bottom:1px solid var(--border);">
+        <form method="POST" style="display:flex;gap:10px;align-items:center;">
+            {{ edit_form.hidden_tag() }}
+            {{ edit_form.email(class="form-control", style="flex:1;") }}
+            {{ edit_form.submit(class="save-btn", style="width:auto;padding:8px 16px;") }}
+            <a href="#" onclick="this.parentElement.parentElement.style.display='none';this.parentElement.parentElement.previousElementSibling.style.display='flex';return false;" style="color:var(--muted);font-size:14px;">Отмена</a>
+        </form>
+    </div>
+
+    <h3 style="margin-top:30px;">Изменение пароля</h3>
+    <form method="POST" style="display:grid;gap:14px;max-width:400px;">
+        {{ password_form.hidden_tag() }}
+        <div class="form-group">
+            {{ password_form.old_password.label }} {{ password_form.old_password(class="form-control") }}
+            {% for e in password_form.old_password.errors %}<span class="error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+            {{ password_form.new_password.label }} {{ password_form.new_password(class="form-control") }}
+            {% for e in password_form.new_password.errors %}<span class="error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+            {{ password_form.new_password_confirm.label }} {{ password_form.new_password_confirm(class="form-control") }}
+            {% for e in password_form.new_password_confirm.errors %}<span class="error">{{ e }}</span>{% endfor %}
+        </div>
+        {{ password_form.submit(class="save-btn") }}
+    </form>
+
+    <h3 style="margin-top:40px;">История заказов</h3>
+    {% if orders %}
+        <div class="orders-history">
+            {% for order in orders %}
+            <div class="order-card">
+                <div class="order-header">
+                    <span>📦 Заказ #{{ order.user_order_number }}</span>
+                    <span class="order-date">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                </div>
+                <ul class="order-items-list">
+                    {% for item in order.items %}
+                    <li>{{ item.product_name }} × {{ item.quantity }} шт. — {{ "%.0f"|format(item.price * item.quantity) }} ₽</li>
+                    {% endfor %}
+                </ul>
+                <div class="order-total">Итого: <strong>{{ "%.0f"|format(order.total_price) }} ₽</strong></div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-state" style="text-align:center;color:var(--muted);padding:20px 0;">Заказов пока нет</p>
+    {% endif %}
+</div>
+{% endblock %}

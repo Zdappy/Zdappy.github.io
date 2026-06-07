@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a href="javascript:history.back()" class="back-btn">
+        ← Назад
+    </a>
+<div class="blog-container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    
+    <h1 style="margin-bottom: 30px; text-align: center;">Статьи и обзоры</h1>
+
+    <div class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
+        
+        {% for post in posts %}
+        <div class="blog-card" style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column;">
+            
+            {% if post.image_post %}
+            <img src="{{ post.image_post }}" alt="{{ post.title }}" style="width: 100%; height: 200px; object-fit: cover;">
+            {% else %}
+            <div style="width: 100%; height: 200px; background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #666;">
+                Нет изображения
+            </div>
+            {% endif %}
+
+            <div class="blog-body" style="padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <span style="font-size: 0.85rem; color: gray;">{{ post.date_posted.strftime('%d.%m.%Y') }}</span>
+                    <h3 style="margin: 10px 0; font-size: 1.3rem;">{{ post.title }}</h3>
+                    <p style="color: #555; font-size: 0.95rem; line-height: 1.5;">
+                        {{ post.content[:120] }}{% if post.content|length > 120 %}...{% endif %}
+                    </p>
+                </div>
+
+                <a href="{{ url_for('main.post_detail', post_id=post.id) }}" style="display: inline-block; margin-top: 15px; color: var(--brand, #2ecc71); text-decoration: none; font-weight: bold;">
+                    Читать далее →
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <p style="grid-column: 1/-1; text-align: center; color: gray; padding: 40px;">Статей пока нет.</p>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}
