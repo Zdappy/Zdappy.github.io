@@ -29,8 +29,8 @@
         <div class="stories-container" style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: thin; -webkit-overflow-scrolling: touch;">
             
             {% for post in posts %}
-            <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="story-item" style="text-decoration: none; color: inherit; display: flex; align-items: center; width: 350px; height: 120px; background: #fff; border-radius: 60px; border: 2px solid var(--brand); overflow: hidden; flex-shrink: 0; transition: transform 0.2s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                <div class="story-image-side" style="flex: 1; height: 100%; max-width: 110px;">
+            <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="story-item" style="text-decoration: none; color: inherit; display: flex; align-items: center; width: 450px; height: 150px; border-radius: 60px; background: var(--surface); border: 1px solid var(--border); overflow: hidden; flex-shrink: 0; transition: transform 0.2s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <div class="story-image-side" style="flex: 1; height: 100%; max-width: 270px;">
                     {% if post.image_post %}
                         <img src="{{ post.image_post }}" alt="{{ post.title }}" style="width: 100%; height: 100%; object-fit: cover;">
                     {% else %}
@@ -39,10 +39,10 @@
                 </div>
 
                 <div class="story-text-side" style="flex: 2; padding: 0 20px 0 30px; display: flex; flex-direction: column; justify-content: center; overflow: hidden;">
-                    <h4 style="margin: 0; font-size: 1rem; color: #333; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
+                    <h4 style="margin: 0; font-size: 1rem; display: block; -webkit-line-clamp: unset; white-space: normal; -webkit-box-orient: vertical; overflow: hidden;">
                         {{ post.title }}
                     </h4>
-                    <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                    <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: inherit; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                         {{ post.content[:80] }}...
                     </p>
                 </div>
