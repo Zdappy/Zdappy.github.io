@@ -4,7 +4,7 @@ import logging
 from flask import Flask
 from werkzeug.utils import secure_filename
 from extensions import csrf, db, login_manager
-from models import Category, Product, User, ProductImage   # ProductImage новая модель
+from models import Category, Product, User, ProductImage, Post   # ProductImage новая модель
 from routes import bp
 
 BRAND_NAME = "Новая Эра"

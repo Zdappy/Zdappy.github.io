@@ -9,7 +9,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import or_
 from extensions import db, login_manager
 from forms import LoginForm, ProductForm, RegistrationForm, ProfileEditForm, ChangePasswordForm
-from models import Category, Product, User, ProductImage, Order, OrderItem
+from models import Category, Product, User, ProductImage, Order, OrderItem, Post
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
@@ -84,7 +84,9 @@ def index():
     favorites_ids = []
     if current_user.is_authenticated:
         favorites_ids = [p.id for p in current_user.favorite_products.all()]
-    return render_template("index.html", categories=categories, products=products, favorites_ids=favorites_ids)
+        
+    posts = Post.query.order_by(Post.date_posted.desc()).limit(10).all()
+    return render_template("index.html", categories=categories, products=products, favorites_ids=favorites_ids, posts=posts)
 
 @bp.route("/auth/login", methods=["GET", "POST"])
 def login():
@@ -185,7 +187,7 @@ def checkout():
 @login_required
 def admin():
     _admin_only()
-    return render_template("admin.html", products=Product.query.order_by(Product.id.desc()).all())
+    return render_template("admin.html", products=Product.query.order_by(Product.id.desc()).all(), posts=Post.query.order_by(Post.id.desc()).all())
 
 @bp.route("/admin/add", methods=["GET", "POST"])
 @login_required
@@ -286,6 +288,22 @@ def delete_product(product_id: int):
     flash("Товар удалён.", "warning")
     return redirect(url_for("main.admin"))
 
+@bp.route("/admin/delete_post/<int:post_id>", methods=["POST"])
+@login_required 
+def delete_post(post_id: int):
+    _admin_only()
+    post = db.session.get(Post, post_id)
+    if not post:
+        abort(404)
+    try:
+        db.session.delete(post)
+        db.session.commit()
+        flash("Статья успешно удалена.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Ошибка при удалении статьи.", "danger")
+    return redirect(url_for("main.admin"))
+
 @bp.route("/admin/bulk-upload", methods=["GET"])
 @login_required
 def bulk_upload():
@@ -340,6 +358,40 @@ def bulk_upload_process():
     db.session.commit()
     return jsonify({"success": True, "created": created, "errors": errors}), 200
 
+@bp.route('/admin/add_post', methods=['GET', 'POST'])
+@login_required
+def add_post():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        image_post = request.form.get('image_post') 
+        product_id = request.form.get('product_id') 
+
+        if not title or not content:
+            flash('Заголовок и текст статьи обязательны для заполнения!', 'danger')
+            return redirect(url_for('main.add_post'))
+
+        if product_id == '':
+            product_id = None
+            
+        new_post = Post(
+            title=title,
+            content=content,
+            image_post=image_post,
+            product_id=product_id,
+            date_posted=datetime.utcnow()
+        )
+
+        db.session.add(new_post)
+        db.session.commit()
+
+        flash('Статья успешно добавлена!', 'success')
+        return redirect(url_for('main.blog')) 
+
+    products = Product.query.all()
+    return render_template('admin_post_form.html', products=products)
+
+
 @bp.route("/api/products", methods=["GET"])
 def api_products():
     return jsonify([p.to_dict() for p in product_query().all()]), 200
@@ -379,6 +431,16 @@ def remove_favorite(product_id: int):
         current_user.favorite_products.remove(product)
         db.session.commit()
     return redirect(request.referrer or url_for("main.index"))
+
+@bp.route('/blog')
+def blog():
+    posts = Post.query.order_by(Post.date_posted.desc()).all()
+    return render_template('blog.html', posts=posts)
+
+@bp.route('/blog/<int:post_id>')
+def post_detail(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('post.html', post=post)
 
 @bp.app_errorhandler(403)
 def forbidden(e):

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-form-container" style="max-width: 600px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    
+    <h2 style="margin-bottom: 20px;">Добавление новой статьи</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" style="padding: 10px; margin-bottom: 15px; border-radius: 4px; background-color: #f8d7da; color: #721c24;">
+              {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('main.add_post') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label for="title" style="display: block; margin-bottom: 5px; font-weight: bold;">Заголовок статьи *</label>
+            <input type="text" id="title" name="title" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label for="image_post" style="display: block; margin-bottom: 5px; font-weight: bold;">Ссылка на картинку-обложку</label>
+            <input type="text" id="image_post" name="image_post" placeholder="например, /static/images/blog1.png" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label for="product_id" style="display: block; margin-bottom: 5px; font-weight: bold;">Привязать к товару</label>
+            <select id="product_id" name="product_id" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="">-- Без привязки к товару --</option>
+                {% for p in products %}
+                    <option value="{{ p.id }}">{{ p.name }} ({{ "%.0f"|format(p.price) }} ₽)</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label for="content" style="display: block; margin-bottom: 5px; font-weight: bold;">Текст статьи *</label>
+            <textarea id="content" name="content" rows="10" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;" required></textarea>
+        </div>
+
+        <div class="form-actions" style="display: flex; gap: 10px;">
+            <button type="submit" class="btn-submit" style="padding: 10px 20px; background: var(--brand, #2ecc71); color: #fff; border: none; border-radius: 4px; cursor: pointer;">Опубликовать</button>
+            <a href="{{ url_for('main.admin') }}" class="btn-cancel" style="padding: 10px 20px; background: #e74c3c; color: #fff; text-decoration: none; border-radius: 4px;">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

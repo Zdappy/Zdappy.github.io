@@ -107,3 +107,13 @@ class OrderItem(db.Model):
     product_name = db.Column(db.String(200), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
+    
+class Post(db.Model):
+    __tablename__ = 'post'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False) 
+    content = db.Column(db.Text, nullable=False)      
+    date_posted = db.Column(db.DateTime, default=datetime.now)
+    image_post = db.Column(db.String(255))           
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=True)
+    related_product = db.relationship('Product', backref='posts')
