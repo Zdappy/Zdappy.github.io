@@ -10,6 +10,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
+<!-- ⚡ Синхронное применение темы до отрисовки -->
+<script>
+    (function() {
+        const theme = localStorage.getItem("zdappy_theme");
+        if (theme === "dark") {
+            document.body.classList.add("dark-theme");
+        }
+    })();
+</script>
+
 <header class="header">
     <div class="container header-inner">
         <div class="logo">

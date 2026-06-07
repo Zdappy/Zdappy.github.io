@@ -421,6 +421,7 @@ def product_detail(product_id):
     if product.image_url:
         all_images.append(product.image_url)
     all_images.extend(extra_urls)
+    favorites_ids = []
     if current_user.is_authenticated:
         favorites_ids = [p.id for p in current_user.favorite_products.all()]
     else:

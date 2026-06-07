@@ -21,7 +21,7 @@
         const isDark = theme === "dark";
         document.body.classList.toggle("dark-theme", isDark);
         const btn = document.getElementById("themeToggle");
-        if(btn) btn.textContent = isDark ? "️" : "🌙";
+        if (btn) btn.textContent = isDark ? "☀️" : "🌙";
         localStorage.setItem(THEME_KEY, theme);
     }
 
@@ -32,6 +32,47 @@
         notif.className = `cart-notification cart-notification-${type}`;
         notif.style.display = "block";
         setTimeout(() => { notif.style.display = "none"; }, 3000);
+    }
+
+    // ----- Функция для галереи (стрелки + миниатюры) -----
+    function initGallery() {
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const mainImage = document.getElementById('mainProductImage');
+        const prevBtn = document.getElementById('prevImageBtn');
+        const nextBtn = document.getElementById('nextImageBtn');
+        if (!mainImage || thumbnails.length === 0) return; // галереи нет на этой странице
+
+        let currentIndex = 0;
+        let imagesList = [];
+
+        thumbnails.forEach((thumb, idx) => {
+            const url = thumb.getAttribute('data-full');
+            if (url) imagesList.push(url);
+            if (thumb.classList.contains('active')) currentIndex = idx;
+        });
+
+        function updateGallery(index) {
+            if (imagesList.length === 0) return;
+            if (index < 0) index = 0;
+            if (index >= imagesList.length) index = imagesList.length - 1;
+            currentIndex = index;
+            mainImage.src = imagesList[currentIndex];
+            thumbnails.forEach((thumb, i) => {
+                if (i === currentIndex) thumb.classList.add('active');
+                else thumb.classList.remove('active');
+            });
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', () => updateGallery(currentIndex - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => updateGallery(currentIndex + 1));
+        thumbnails.forEach((thumb, idx) => {
+            thumb.addEventListener('click', () => updateGallery(idx));
+        });
+
+        if (imagesList.length <= 1) {
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
+        }
     }
 
     let isProcessing = false;
@@ -81,7 +122,7 @@
                     container.appendChild(row);
                 });
                 totalEl.textContent = `Итого: ${formatPrice(total)}`;
-                
+
                 container.addEventListener("click", (e) => {
                     const btn = e.target.closest("button");
                     if(!btn) return;
@@ -176,5 +217,15 @@
                 }
             });
         }
+
+        // --- Инициализация галереи (если есть на странице) ---
+        initGallery();
     });
+
+    // ---------- ДОБАВЛЕННЫЙ ОБРАБОТЧИК ДЛЯ СИНХРОНИЗАЦИИ ТЕМЫ ПРИ НАВИГАЦИИ НАЗАД/ВПЕРЁД ----------
+    window.addEventListener('pageshow', function(event) {
+        const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+        applyTheme(savedTheme);
+    });
+    // -------------------------------------------------------------------------------------------
 })();
