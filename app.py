@@ -55,7 +55,8 @@ def create_app() -> Flask:
     app = Flask(__name__, instance_relative_config=True)
 
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-prod")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///shop.db")
+    default_db_path = os.path.join(app.instance_path, "shop.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", f"sqlite:///{default_db_path}")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["BRAND_NAME"] = BRAND_NAME
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER

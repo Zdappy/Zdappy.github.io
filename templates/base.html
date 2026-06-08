@@ -39,6 +39,22 @@
                     <a href="{{ url_for('main.admin') }}" class="top-link">Админка</a>
                 {% endif %}
                 
+                <div class="notif-bell-wrapper" id="notifBellWrapper">
+                    <button class="notif-bell-btn" id="notifBellBtn" type="button" title="Уведомления о заказах">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <div class="notif-panel" id="notifPanel" style="display:none;">
+                        <div class="notif-panel-header">
+                            <span class="notif-panel-title">Уведомления</span>
+                            <button class="notif-clear-btn" id="notifClearBtn" type="button">Очистить всё</button>
+                        </div>
+                        <div class="notif-list" id="notifList">
+                            <div class="notif-empty">Нет новых уведомлений</div>
+                        </div>
+                    </div>
+                </div>
+                
                 <a href="{{ url_for('main.profile') }}" class="profile-btn">{{ current_user.username }}</a>
                 <a href="{{ url_for('main.logout') }}" class="top-link">Выйти</a>
             {% else %}

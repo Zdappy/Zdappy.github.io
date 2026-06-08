@@ -88,8 +88,8 @@
             {% for post in posts %}
             <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="story-item" style="text-decoration: none; color: inherit; display: flex; align-items: center; width: 450px; height: 150px; border-radius: 60px; background: var(--surface); border: 1px solid var(--border); overflow: hidden; flex-shrink: 0; transition: transform 0.2s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                 <div class="story-image-side" style="flex: 1; height: 100%; max-width: 270px;">
-                    {% if post.image_post %}
-                        <img src="/{{ post.image_post.lstrip('/') }}" alt="{{ post.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% if post.image_src %}
+                        <img src="/{{ post.image_src.lstrip('/') }}" alt="{{ post.title }}" style="width: 100%; height: 100%; object-fit: cover;">
                     {% else %}
                         <div style="width: 100%; height: 100%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">📝</div>
                     {% endif %}

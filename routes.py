@@ -136,23 +136,61 @@ def profile():
     edit_form.login.data = current_user.username
     password_form = ChangePasswordForm()
 
-    if edit_form.validate_on_submit():
-        current_user.surname = edit_form.surname.data.strip()
-        current_user.name = edit_form.name.data.strip()
-        current_user.username = edit_form.login.data.strip().lower()
-        current_user.email = edit_form.email.data.strip()
-        db.session.commit()
-        flash("Данные обновлены.", "success")
-        return redirect(url_for("main.profile"))
+    if request.method == "POST":
+        if "old_password" in request.form or "new_password" in request.form:
+            if password_form.validate_on_submit():
+                if current_user.check_password(password_form.old_password.data):
+                    current_user.set_password(password_form.new_password.data)
+                    db.session.commit()
+                    flash("Пароль изменен.", "success")
+                    return redirect(url_for("main.profile"))
+                flash("Неверный текущий пароль.", "error")
+            else:
+                _flash_errors(password_form)
 
-    if password_form.validate_on_submit():
-        if current_user.check_password(password_form.old_password.data):
-            current_user.set_password(password_form.new_password.data)
-            db.session.commit()
-            flash("Пароль изменен.", "success")
-            return redirect(url_for("main.profile"))
-        else:
-            flash("Неверный текущий пароль.", "error")
+        elif "email" in request.form and "login" not in request.form and "surname" not in request.form and "name" not in request.form:
+            new_email = (request.form.get("email") or "").strip()
+            if not new_email:
+                flash("E-mail не может быть пустым.", "error")
+            elif new_email != current_user.email and User.query.filter_by(email=new_email).first():
+                flash("Такой email уже зарегистрирован.", "error")
+            else:
+                current_user.email = new_email
+                db.session.commit()
+                flash("E-mail обновлён.", "success")
+                return redirect(url_for("main.profile"))
+
+        elif "login" in request.form and "surname" not in request.form and "name" not in request.form and "email" not in request.form:
+            new_login = (request.form.get("login") or "").strip().lower()
+            if len(new_login) < 3:
+                flash("Логин должен содержать минимум 3 символа.", "error")
+            elif new_login != current_user.username and User.query.filter_by(username=new_login).first():
+                flash("Такой логин уже занят.", "error")
+            else:
+                current_user.username = new_login
+                db.session.commit()
+                flash("Логин обновлён.", "success")
+                return redirect(url_for("main.profile"))
+
+        elif "surname" in request.form and "name" not in request.form and "login" not in request.form and "email" not in request.form:
+            new_surname = (request.form.get("surname") or "").strip()
+            if len(new_surname) < 2:
+                flash("Фамилия должна содержать минимум 2 символа.", "error")
+            else:
+                current_user.surname = new_surname
+                db.session.commit()
+                flash("Фамилия обновлена.", "success")
+                return redirect(url_for("main.profile"))
+
+        elif "name" in request.form and "surname" not in request.form and "login" not in request.form and "email" not in request.form:
+            new_name = (request.form.get("name") or "").strip()
+            if len(new_name) < 2:
+                flash("Имя должно содержать минимум 2 символа.", "error")
+            else:
+                current_user.name = new_name
+                db.session.commit()
+                flash("Имя обновлено.", "success")
+                return redirect(url_for("main.profile"))
 
     orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
     return render_template("profile.html", edit_form=edit_form, password_form=password_form, orders=orders)
@@ -162,23 +200,54 @@ def basket():
     return render_template("basket.html")
 
 @bp.route("/api/checkout", methods=["POST"])
-@login_required
 def checkout():
-    data = request.get_json()
-    if not data or 'items' not in data or not data['items']:
-        return jsonify({"error": "Корзина пуста"}), 400
-    items = data['items']
-    total = 0
+    if not current_user.is_authenticated:
+        return jsonify({"success": False, "error": "Сначала войдите в аккаунт, чтобы оформить заказ."}), 401
+
+    data = request.get_json(silent=True) or {}
+    items = data.get("items") or []
+    if not items:
+        return jsonify({"success": False, "error": "Корзина пуста"}), 400
+
+    normalized_items: dict[int, int] = {}
+    for item in items:
+        try:
+            product_id = int(item.get("id"))
+            qty = max(1, int(item.get("quantity", 1)))
+        except (TypeError, ValueError, AttributeError):
+            continue
+        normalized_items[product_id] = normalized_items.get(product_id, 0) + qty
+
+    if not normalized_items:
+        return jsonify({"success": False, "error": "Не удалось оформить заказ"}), 400
+
+    total = 0.0
     last_order = Order.query.filter_by(user_id=current_user.id).order_by(Order.user_order_number.desc()).first()
     next_number = (last_order.user_order_number + 1) if last_order else 1
     order = Order(user_id=current_user.id, total_price=0, user_order_number=next_number)
     db.session.add(order)
     db.session.flush()
-    for item in items:
-        qty = int(item.get('quantity', 1))
-        price = float(item.get('price_value', 0))
+
+    for product_id, qty in normalized_items.items():
+        product = db.session.get(Product, product_id)
+        if not product:
+            continue
+
+        price = float(product.price)
         total += qty * price
-        db.session.add(OrderItem(order_id=order.id, product_name=item.get('title', 'Товар'), quantity=qty, price=price))
+        db.session.add(
+            OrderItem(
+                order_id=order.id,
+                product_name=product.name,
+                quantity=qty,
+                price=price,
+            )
+        )
+
+    if total <= 0:
+        db.session.rollback()
+        return jsonify({"success": False, "error": "Не удалось оформить заказ"}), 400
+
     order.total_price = total
     db.session.commit()
     return jsonify({"success": True, "order_id": order.id, "order_number": next_number}), 200
@@ -197,7 +266,8 @@ def add_product():
     if form.validate_on_submit():
         main_file = request.files.get('main_image')
         main_url = _save_file(main_file) if main_file else None
-        product = Product(name=form.name.data.strip(), description=form.description.data.strip(), price=float(form.price.data), image_url=main_url, category_id=form.category.data)
+        category_id = request.form.get("category", type=int) or form.category.data
+        product = Product(name=form.name.data.strip(), description=form.description.data.strip(), price=float(form.price.data), image_url=main_url, category_id=category_id)
         db.session.add(product)
         db.session.flush()
         extra_files = request.files.getlist('extra_images')
@@ -220,13 +290,22 @@ def edit_product(product_id: int):
     product = db.session.get(Product, product_id)
     if not product:
         abort(404)
+
     form = ProductForm(obj=product)
     form.category.data = product.category_id
+
+    if request.method == "POST":
+        form.category.data = request.form.get("category", type=int) or product.category_id
+
     if form.validate_on_submit():
         product.name = form.name.data.strip()
         product.description = form.description.data.strip()
         product.price = float(form.price.data)
-        product.category_id = form.category.data
+
+        selected_category_id = request.form.get("category", type=int) or form.category.data
+        if selected_category_id:
+            product.category_id = selected_category_id
+
         main_file = request.files.get('main_image')
         if main_file and main_file.filename != '':
             if product.image_url:
@@ -238,6 +317,7 @@ def edit_product(product_id: int):
             new_url = _save_file(main_file)
             if new_url:
                 product.image_url = new_url
+
         extra_files = request.files.getlist('extra_images')
         max_order = db.session.query(db.func.max(ProductImage.order)).filter_by(product_id=product.id).scalar() or -1
         for file in extra_files:
@@ -246,6 +326,7 @@ def edit_product(product_id: int):
                 max_order += 1
                 img = ProductImage(product_id=product.id, url=url, order=max_order)
                 db.session.add(img)
+
         delete_ids = request.form.getlist('delete_extra_ids')
         for img_id in delete_ids:
             img = ProductImage.query.get(int(img_id))
@@ -256,6 +337,7 @@ def edit_product(product_id: int):
                     if os.path.exists(full_path):
                         os.remove(full_path)
                 db.session.delete(img)
+
         db.session.commit()
         flash("Товар обновлён.", "success")
         return redirect(url_for("main.admin"))
@@ -291,6 +373,7 @@ def delete_product(product_id: int):
 @bp.route("/admin/edit_post/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def edit_post(post_id):
+    _admin_only()
     post = Post.query.get_or_404(post_id)
     if request.method == "POST":
         post.title = request.form.get("title")
@@ -378,6 +461,7 @@ def bulk_upload_process():
 @bp.route('/admin/add_post', methods=['GET', 'POST'])
 @login_required
 def add_post():
+    _admin_only()
     if request.method == 'POST':
         title = request.form.get('title')
         content = request.form.get('content')
