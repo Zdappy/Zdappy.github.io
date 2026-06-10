@@ -292,12 +292,38 @@ background: var(--surface);
 /* Responsive */
 @media (max-width: 1024px) {
 .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.header-inner {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 10px 5px !important;
 }
+}
+
+
 @media (max-width: 720px) {
-.container { width: min(100% - 20px, 1180px); }
-.header-inner, .section-head, .cart-summary, .admin-head { align-items: stretch; }
-.header-inner, .top-nav, .search-form, .admin-actions { flex-direction: column; }
-.products-grid { grid-template-columns: 1fr; }
+/* .container { width: min(100% - 20px, 1180px); } */
+.header-inner {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 10px 5px !important;
+}
+.top-nav {
+    display: flex !important;
+    flex-direction: row !important; 
+    flex-wrap: wrap !important;    
+    justify-content: flex-end !important;
+    gap: 8px !important;          
+}
+.products-grid {
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 12px !important; 
+}
+
+    
 .form-container, .cart-container, .error-page, .admin-card { padding: 18px; }
 .cart-item { grid-template-columns: 72px 1fr; }
 .qty-controls { grid-column: 1 / -1; justify-content: flex-start; }
@@ -317,6 +343,111 @@ border: none;
 padding: 8px 0;
 }
 .admin-table td::before { content: attr(data-label); font-weight: 700; color: var(--muted); }
+
+
+
+.search-form {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 10px !important;
+}
+.search-input[name="search"] {
+    flex: 6 !important;   
+    width: 100% !important;
+    padding: 10px !important;
+}
+.search-form select[name="category"] {
+    flex: 4 !important;   
+    width: calc(50% - 5px) !important;
+    padding: 10px !important;
+}
+.search-btn {
+    flex: 1 !important;   
+    width: calc(20% - 5px) !important;
+    padding: 12px !important;
+}
+
+
+
+.product-page-container {
+    padding: 0px !important;
+}
+.product-detail-wrapper {
+    display: flex !important;
+    flex-direction: column !important; 
+    gap: 20px !important;            
+    width: 100% !important;
+}
+.product-image-block {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+.product-info-block {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+
+
+
+.gallery-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+/* Главное изображение со стрелками */
+.main-image-wrapper {
+    position: relative !important;
+}
+/* Контейнер для маленьких картинок (миниатюр) */
+.thumbnail-list {
+    display: flex !important;
+    flex-direction: row !important; /* Строго горизонтальный ряд */
+    justify-content: center !important; /* Центрируем миниатюры под главным фото */
+    gap: 8px !important;            /* Расстояние между маленькими картинками */
+    width: 100% !important;
+    overflow-x: auto !important;    /* Если картинок много, появится аккуратная прокрутка */
+    padding: 4px 0 !important;
+}
+/* Сами маленькие картинки-превью */
+.thumbnail-list img.thumbnail {
+    width: 60px !important;         /* Жесткая маленькая ширина */
+    height: 60px !important;        /* Жесткая маленькая высота (делаем квадратными) */
+    flex-shrink: 0 !important;      /* Запрещаем им сжиматься */
+    object-fit: cover !important;   /* Чтобы фото внутри миниатюры не искажалось */
+    border-radius: 6px !important;  /* Легкое аккуратное скругление углов */
+    cursor: pointer !important;
+    transition: opacity 0.2s ease, border-color 0.2s ease !important;
+    border: 2px solid transparent !important;
+}
+/* Стили для активной миниатюры (которая сейчас выбрана) */
+.thumbnail-list img.thumbnail.active {
+    border-color: var(--brand, #2e7d32) !important; /* Подсветка рамки активного превью */
+    opacity: 1 !important;
+}
+/* Эффект при наведении на остальные миниатюры */
+.thumbnail-list img.thumbnail:not(.active) {
+    opacity: 0.6 !important;
+}
+.thumbnail-list img.thumbnail:not(.active):hover {
+    opacity: 0.9 !important;
+}
+}
+
+
+
+@media (max-width: 515px){
+
 }
 
 /* Dark mode for select dropdowns */
