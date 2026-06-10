@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a href="javascript:history.back()" class="back-btn">
+        ← Назад
+    </a>
+<article class="post-container" style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+    
+    <header>
+        <h1 style="font-size: 2.5rem;">{{ post.title }}</h1>
+        <p style="color: gray;">Опубликовано: {{ post.date_posted.strftime('%d.%m.%Y') }}</p>
+    </header>
+
+    {% if post.image_post %}
+    <img src="/{{ post.image_post.lstrip('/') }}" alt="{{ post.title }}" style="width: 100%; border-radius: 12px; margin: 20px 0;">
+    {% endif %}
+
+    <div class="post-content" style="font-size: 1.1rem; line-height: 1.8;">
+        {{ post.content | safe }} 
+    </div>
+
+    {% if post.related_product %}
+    <div class="related-product-section" style="margin-top: 50px; padding: 20px; background: #f9f9f9; border-radius: 12px;">
+        <h3>Товар из статьи:</h3>
+        <div class="product-card" style="max-width: 300px; background: #fff;">
+            <a href="{{ url_for('main.product_detail', product_id=post.related_product.id) }}">
+                <img src="{{ post.related_product.image_src }}" style="width: 100%;">
+                <h4>{{ post.related_product.name }}</h4>
+                <p class="price">{{ post.related_product.price }} ₽</p>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</article>
+{% endblock %}

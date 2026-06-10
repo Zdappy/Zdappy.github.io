@@ -487,7 +487,7 @@ def add_post():
         db.session.commit()
 
         flash('Статья успешно добавлена!', 'success')
-        return redirect(url_for('main.blog')) 
+        return redirect(url_for('main.admin')) 
 
     products = Product.query.all()
     return render_template('admin_post_form.html', products=products)
